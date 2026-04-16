@@ -2,11 +2,13 @@
 
 namespace App\Swagger;
 
+use OpenApi\Annotations as OA;
+
 /**
  * @OA\Info(
- *     title="E-Commerce API",
+ *     title="E-commerce API",
  *     version="1.0.0",
- *     description="API documentation for E-Commerce"
+ *     description="API documentation for E-commerce"
  * )
  *
  * @OA\Server(
