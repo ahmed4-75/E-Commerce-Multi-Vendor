@@ -7,11 +7,14 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -22,6 +25,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'lang',
+        'otp',
+        'favicon'
     ];
 
     /**
@@ -45,5 +52,45 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the products for the blog user.
+    */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class,'user_id');
+    }
+
+    /**
+     * Get the cart associated with the user.
+    */
+    public function carts(): HasOne
+    {
+        return $this->hasOne(Cart::class,'user_id');
+    }
+
+    /**
+     * Get the orders for the blog user.
+    */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class,'user_id');
+    }
+
+    /**
+     * Get the comments for the blog user.
+    */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class,'user_id');
+    }
+
+    /**
+     * Get the shops for the blog user.
+    */
+    public function shops(): HasMany
+    {
+        return $this->hasMany(Shop::class,'user_id');
     }
 }

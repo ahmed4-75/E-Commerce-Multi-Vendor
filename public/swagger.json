@@ -1,0 +1,49 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "E-commerce API",
+        "description": "API documentation for E-commerce",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost/Ecommerce/public",
+            "description": "Local server"
+        }
+    ],
+    "paths": {
+        "/api/test": {
+            "get": {
+                "summary": "Get test",
+                "operationId": "7a09caa81b6dfd4c5087d06d7689eaa8",
+                "responses": {
+                    "200": {
+                        "description": "test Swagger",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successful operation Test"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    }
+}
