@@ -19,11 +19,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
  *     @OA\Property(property="active", type="boolean", example=true),
- *     @OA\Property(property="active", type="boolean", example=true),
  *     @OA\Property(property="products", type="array", description="Loaded only if relation products is loaded", @OA\Items(ref="#/components/schemas/ProductResource")),
  *     @OA\Property(property="carts", type="array", description="Loaded only if relation carts is loaded", @OA\Items(ref="#/components/schemas/CartResource")),
  *     @OA\Property(property="orders", type="array", description="Loaded only if relation orders is loaded", @OA\Items(ref="#/components/schemas/OrderResource")),
- *     @OA\Property(property="comments", type="array", description="Loaded only if relation comments is loaded", @OA\Items(ref="#/components/schemas/CommentResource"))
+ *     @OA\Property(property="comments", type="array", description="Loaded only if relation comments is loaded", @OA\Items(ref="#/components/schemas/CommentResource")),
  *     @OA\Property(property="shops", type="array", description="Loaded only if relation shops is loaded", @OA\Items(ref="#/components/schemas/ShopResource"))
  * )
 */

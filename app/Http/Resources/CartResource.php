@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
  *     @OA\Property(property="id", type="integer",example=1),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
- *     @OA\Property(property="items",type="array",@OA\Items(
+ *     @OA\Property(property="items", type="array", @OA\Items(
  *         type="object",
  *         @OA\Property(property="id", type="integer", example=1),
  *         @OA\Property(property="name", type="string", example="Product name"),
