@@ -21,14 +21,6 @@ class OrderedProducts extends Model
     ];
 
     /**
-     * Get the order that owns the ordered product.
-    */
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo(Order::class,'order_id');
-    }
-
-    /**
      *  Get the product that owns the ordered product.
     */
     public function product(): BelongsTo
@@ -40,4 +32,13 @@ class OrderedProducts extends Model
     {
         return $this->quantity * $this->price;
     }
+    
+    /**
+     * Get the order that owns the ordered product.
+    */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class,'order_id');
+    }
+
 }

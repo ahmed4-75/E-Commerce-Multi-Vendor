@@ -93,4 +93,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Shop::class,'user_id');
     }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return !$this->trashed();
+    }
 }
