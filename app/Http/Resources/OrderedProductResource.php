@@ -16,7 +16,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="total", type="number", example=200),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
- *     @OA\Property(property="product", description="Loaded only if relation product is loaded", ref="#/components/schemas/ProductResource")
+ *     @OA\Property(property="product", description="Loaded only if relation product is loaded", ref="#/components/schemas/ProductResource"),
  *     @OA\Property(property="order", description="Loaded only if relation order is loaded", ref="#/components/schemas/OrderResource")
  * )
 */
