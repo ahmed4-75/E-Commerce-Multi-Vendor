@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Auth;
 
 class Cart extends Model
 {
@@ -31,6 +32,22 @@ class Cart extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class,'products_carts','cart_id','product_id')->withPivot('quantity','price')->as('item');
+    }
+
+    public function items(string $lang)
+    {
+        if ($this->products->isEmpty()) { return []; }
+        return $this->products->map(function ($product) use ($lang) {
+            $translation = $product->translations->firstWhere('lang', $lang);
+            return [
+                'id' => $product->id,
+                'name' => $translation?->name,
+                'description' => $translation?->description,
+                'quantity' => $product->item?->quantity,
+                'price' => $product->item?->price,
+                'product_total' => ($product->item?->quantity ?? 0) * ($product->item?->price  ?? 0)
+            ];
+        });
     }
 
     public function getCartTotalAttribute()

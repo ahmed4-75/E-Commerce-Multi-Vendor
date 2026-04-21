@@ -27,4 +27,9 @@ class Translation extends Model
     {
         return $this->morphTo();
     }
+
+    public function getTypeAttribute()
+    {
+        return strtolower(class_basename($this->translationable_type));
+    }
 }
