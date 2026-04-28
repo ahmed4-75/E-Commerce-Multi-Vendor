@@ -70,7 +70,7 @@ class LoginNoPasswordController extends Controller
      *         @OA\JsonContent(
      *             required={"email","token","password"},
      *             @OA\Property(property="token",type="string", example="f4e7b3c9a0b1d2e3..."),
-     *             @OA\Property(property="email",type="string", format="email", description="exists:users,email",maxLength=50,example="user@test.com"),
+     *             @OA\Property(property="email",type="string", format="email", description="exists:users,email",maxLength=50,example="ahmed@example.com"),
      *             @OA\Property(property="password",type="string", minLength=6, format="password",example="123456"),
      *             @OA\Property(property="password_confirmation", type="string", format="password", example="123456")
      *

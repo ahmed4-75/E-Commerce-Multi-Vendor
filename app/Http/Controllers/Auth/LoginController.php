@@ -24,7 +24,7 @@ class LoginController extends Controller
      *     @OA\RequestBody(
      *         @OA\JsonContent(
      *             required={"identification","password"},
-     *             @OA\Property(property="identification",type="string",maxLength=50,description="Email or phone number",example="user@test.com or +201123456789"),
+     *             @OA\Property(property="identification",type="string",maxLength=50,description="Email or phone number",example="ahmed@example.com or +201023456789"),
      *             @OA\Property(property="password",type="string",minLength=6,example="123456"),
      *             @OA\Property(property="remember",type="string",enum={"on","off"},example="off")
      *         )

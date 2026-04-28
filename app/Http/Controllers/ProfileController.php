@@ -165,7 +165,7 @@ class ProfileController extends Controller
             }
             $file = $request->file('favicon');
             $fileName = $user->id."_".Str::slug($user->name)."_favicon.".$file->getClientOriginalExtension();
-            $file->storeAs("favicons",$fileName);
+            $file->storeAs("favicons",$fileName,"private");
             $user->update(['favicon' => $fileName]);
         }
 
