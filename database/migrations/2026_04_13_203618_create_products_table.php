@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('quantity');
             $table->decimal('price',8,2);
+            $table->decimal('discount',8,2)->nullable();
             $table->foreignId("category_id")->constrained("categories")->cascadeOnDelete();
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
             $table->foreignId("shop_id")->constrained("shops")->cascadeOnDelete();

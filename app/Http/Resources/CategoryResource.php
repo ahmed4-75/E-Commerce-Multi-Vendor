@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @OA\Schema(
@@ -15,7 +15,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
  *     @OA\Property(property="active", type="boolean", example=true),
- *     @OA\Property(property="translations", type="array", description="Loaded only if relation translations is loaded", @OA\Items(ref="#/components/schemas/TranslationResource")),
+ *     @OA\Property(property="translation", ref="#/components/schemas/TranslationResource"),
  *     @OA\Property(property="products", type="array", description="Loaded only if relation products is loaded", @OA\Items(ref="#/components/schemas/ProductResource"))
  * )
 */
@@ -28,13 +28,14 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $translation = $this->translations->first();
         return [
             'id' => $this->id,
-            'image_path' => $this->id,
+            'image_path' => $this->image_path,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
-            'translations' => TranslationResource::collection($this->whenLoaded('translations')),
+            'translation' => $translation ? new TranslationResource($translation) : null,
             'products' => ProductResource::collection($this->whenLoaded('products'))
         ];
     }

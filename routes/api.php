@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LoginNoPasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
@@ -26,4 +27,10 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/profile/update',[ProfileController::class,'update']);
     Route::put('/profile/update-password',[ProfileController::class,'updatePassword']);
     Route::post('/logout',[ProfileController::class,'logout']);
+
+    Route::get('/categories',[CategoriesController::class, 'index']);
+    Route::post('/categories/create',[CategoriesController::class, 'store']);
+    Route::get('/categories/show/{id}',[CategoriesController::class, 'show']);
+    Route::post('/categories/update/{id}',[CategoriesController::class, 'update']);
+    Route::delete('/categories/delete/{id}',[CategoriesController::class, 'delete']);
 });

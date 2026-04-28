@@ -32,7 +32,7 @@
                                     "identification": {
                                         "description": "Email or phone number",
                                         "type": "string",
-                                        "example": "user@test.com or +201123456789",
+                                        "example": "ahmed@example.com or +201023456789",
                                         "maxLength": 50
                                     },
                                     "password": {
@@ -207,7 +207,7 @@
                                         "description": "exists:users,email",
                                         "type": "string",
                                         "format": "email",
-                                        "example": "user@test.com",
+                                        "example": "ahmed@example.com",
                                         "maxLength": 50
                                     },
                                     "password": {
@@ -502,6 +502,440 @@
                         "description": "Validation error"
                     }
                 }
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Show categories",
+                "description": "Returns the categories based on a language",
+                "operationId": "ba2f88513b5f6d9f04554acafeaaa2ac",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "description": "language",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ar",
+                                "en",
+                                "ur",
+                                "sp"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All categories",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CategoryResource"
+                                            }
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "All categories"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "categories does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The categories for this language does not exist"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/create": {
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Crete category",
+                "description": "create the category",
+                "operationId": "8332b0dfdbec1ba79b0c22fd9200fafb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "description",
+                                    "lang",
+                                    "image_path"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "devices"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "devices description"
+                                    },
+                                    "lang": {
+                                        "type": "string",
+                                        "example": "ar",
+                                        "enum": [
+                                            "ar",
+                                            "en",
+                                            "ur",
+                                            "sp"
+                                        ]
+                                    },
+                                    "image_path": {
+                                        "description": "file|mimes:pdf,jpeg,jpg,png|max:6120",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "example": "category_image.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Create category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category Created Successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/show/{id}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Show a category",
+                "description": "Returns a category based on a language",
+                "operationId": "7efb1426b6cf5351a100fd4d07c65ede",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "category id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "description": "language",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ar",
+                                "en",
+                                "ur",
+                                "sp"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "show a Category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CategoryResource"
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Show Category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "category does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The category for this language does not exist"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/update/{id}": {
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Update a category",
+                "description": "Returns a category based on a language",
+                "operationId": "809553e18d328a88d81966af1834ed33",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "category id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "translation_id",
+                                    "name",
+                                    "description",
+                                    "image_path"
+                                ],
+                                "properties": {
+                                    "translation_id": {
+                                        "description": "exists:translations,id",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "name": {
+                                        "description": "unique:translations,name,$id",
+                                        "type": "string",
+                                        "example": "devices"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "devices description"
+                                    },
+                                    "image_path": {
+                                        "description": "file|mimes:pdf,jpeg,jpg,png|max:6120",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "example": "category_image.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "update a Category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category Updated Successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/delete/{id}": {
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete category",
+                "description": "Delete a category and all translation ",
+                "operationId": "95eb47df8751fbe84734972bc060f508",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "category id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Delete Category Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category does not exist"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Delete Category fail",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Can not delete the category because it has related products. Move the products or Delete Them."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/profile": {
@@ -862,12 +1296,8 @@
                         "type": "boolean",
                         "example": true
                     },
-                    "translations": {
-                        "description": "Loaded only if relation translations is loaded",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/TranslationResource"
-                        }
+                    "translation": {
+                        "$ref": "#/components/schemas/TranslationResource"
                     },
                     "products": {
                         "description": "Loaded only if relation products is loaded",
@@ -1080,12 +1510,8 @@
                     "shop": {
                         "$ref": "#/components/schemas/ShopResource"
                     },
-                    "translations": {
-                        "description": "Loaded only if relation translations is loaded",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/TranslationResource"
-                        }
+                    "translation": {
+                        "$ref": "#/components/schemas/TranslationResource"
                     },
                     "productImages": {
                         "description": "Loaded only if relation productImages is loaded",
@@ -1331,6 +1757,10 @@
         {
             "name": "Authentication",
             "description": "Authentication"
+        },
+        {
+            "name": "Categories",
+            "description": "Categories"
         },
         {
             "name": "My Profile",
