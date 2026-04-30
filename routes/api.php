@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ShopsController;
 use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,4 +34,10 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/categories/show/{id}',[CategoriesController::class, 'show']);
     Route::post('/categories/update/{id}',[CategoriesController::class, 'update']);
     Route::delete('/categories/delete/{id}',[CategoriesController::class, 'delete']);
+
+    Route::get('/shops',[ShopsController::class, 'index']);
+    Route::get('/shops/show/{id}',[ShopsController::class, 'show']);
+    Route::post('/shops/create',[ShopsController::class, 'store']);
+    Route::put('/shops/update/{id}',[ShopsController::class, 'update']);
+    Route::delete('/shops/delete/{id}',[ShopsController::class, 'delete']);
 });

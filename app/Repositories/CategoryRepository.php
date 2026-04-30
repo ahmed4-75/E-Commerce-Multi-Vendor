@@ -45,6 +45,8 @@ class CategoryRepository implements CategoryInterface
             'name' => $request->name,
             'description' => $request->description,
         ]);
+
+        return $category;
     }
 
 

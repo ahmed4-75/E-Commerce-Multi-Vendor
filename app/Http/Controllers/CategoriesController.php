@@ -9,7 +9,6 @@ use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\UpdateCategoryRequest;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CategoriesController extends Controller
 {
@@ -208,6 +207,15 @@ class CategoriesController extends Controller
      *     ),
      * 
      *     @OA\Response(
+     *         response=404,
+     *         description="Category not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Category not found")
+     *         )
+     *     ),
+     * 
+     *     @OA\Response(
      *         response=422,
      *         description="Validation error"
      *     )
@@ -270,13 +278,6 @@ class CategoriesController extends Controller
                 'status' => 'Success',
                 'message' => 'Category deleted successfully',
             ], 200);
-    
-        } catch (ModelNotFoundException $e) {
-    
-            return response()->json([
-                'status' => 'Error',
-                'message' => 'Category not found',
-            ], 404);
     
         } catch (\Exception $e) {
     

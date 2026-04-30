@@ -838,6 +838,26 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "422": {
                         "description": "Validation error"
                     }
@@ -1182,6 +1202,468 @@
                     },
                     "401": {
                         "description": "Unauthenticated."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shops": {
+            "get": {
+                "tags": [
+                    "Shops"
+                ],
+                "summary": "Show shops",
+                "description": "Returns all shops with basic information",
+                "operationId": "7a6683778d52a3a448807af1f2a39ceb",
+                "responses": {
+                    "200": {
+                        "description": "All shops",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ShopBasicResource"
+                                            }
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "All shops"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shops/show/{id}": {
+            "get": {
+                "tags": [
+                    "Shops"
+                ],
+                "summary": "Show a shop",
+                "description": "Returns one shop with full information",
+                "operationId": "f975911069ce011e6aaaefc4524a4b4a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "shop id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Show shop",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ShopResource"
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Show shop"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Shop not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Shop not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shops/create": {
+            "post": {
+                "tags": [
+                    "Shops"
+                ],
+                "summary": "Create shop",
+                "description": "Create a new shop",
+                "operationId": "ad1e7d4954130ef1db45d8ceb5feeb11",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "address",
+                                    "city",
+                                    "state",
+                                    "country",
+                                    "email",
+                                    "pincode",
+                                    "bank_name",
+                                    "bank_code",
+                                    "bank_country",
+                                    "bank_address",
+                                    "account_name",
+                                    "account_number"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Shop 1"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Shop address"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "marg"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "example": "Cairo"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "Egypt"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+2 01065484974",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "shop@test.com"
+                                    },
+                                    "pincode": {
+                                        "type": "string",
+                                        "example": "12345"
+                                    },
+                                    "website": {
+                                        "type": "string",
+                                        "example": "https://shop.test",
+                                        "nullable": true
+                                    },
+                                    "bank_name": {
+                                        "type": "string",
+                                        "example": "bank name"
+                                    },
+                                    "bank_code": {
+                                        "type": "string",
+                                        "example": "bank code"
+                                    },
+                                    "bank_address": {
+                                        "type": "string",
+                                        "example": "bank address"
+                                    },
+                                    "bank_country": {
+                                        "type": "string",
+                                        "example": "Egypt"
+                                    },
+                                    "account_name": {
+                                        "type": "string",
+                                        "example": "account name"
+                                    },
+                                    "account_number": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Shop created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Shop Created Successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shops/update/{id}": {
+            "put": {
+                "tags": [
+                    "Shops"
+                ],
+                "summary": "Update shop",
+                "description": "Update an existing shop",
+                "operationId": "a062425c89106992c1538059d7bda889",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "shop id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "address",
+                                    "city",
+                                    "state",
+                                    "country",
+                                    "email",
+                                    "pincode",
+                                    "bank_name",
+                                    "bank_code",
+                                    "bank_country",
+                                    "bank_address",
+                                    "account_name",
+                                    "account_number"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Shop"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Updated address"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Giza"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "example": "Giza"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "Egypt"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+2 01065484974",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "shop-updated@test.com"
+                                    },
+                                    "pincode": {
+                                        "type": "string",
+                                        "example": "54321"
+                                    },
+                                    "website": {
+                                        "type": "string",
+                                        "example": "https://shop-updated.test",
+                                        "nullable": true
+                                    },
+                                    "bank_name": {
+                                        "type": "string",
+                                        "example": "bank name"
+                                    },
+                                    "bank_code": {
+                                        "type": "string",
+                                        "example": "bank code"
+                                    },
+                                    "bank_country": {
+                                        "type": "string",
+                                        "example": "Egypt"
+                                    },
+                                    "bank_address": {
+                                        "type": "string",
+                                        "example": "bank address"
+                                    },
+                                    "account_name": {
+                                        "type": "string",
+                                        "example": "account name"
+                                    },
+                                    "account_number": {
+                                        "type": "string",
+                                        "example": "987654321"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Shop updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Shop Updated Successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Shop not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shops/delete/{id}": {
+            "delete": {
+                "tags": [
+                    "Shops"
+                ],
+                "summary": "Delete shop",
+                "description": "Delete a shop. Fails if there are related products.",
+                "operationId": "2d999b27af9fe6b5a7c6a42583deb904",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "shop id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shop deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Shop deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Shop not found"
+                    },
+                    "409": {
+                        "description": "Delete shop fail",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Can not delete the shop because it has related products. Move the products or delete them."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1537,15 +2019,49 @@
                 },
                 "type": "object"
             },
-            "ShopResource": {
+            "ShopBasicResource": {
                 "properties": {
                     "id": {
                         "type": "integer",
                         "example": 1
                     },
-                    "image_path": {
+                    "name": {
                         "type": "string",
-                        "example": "image path"
+                        "example": "name"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "name@test.com"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "shop address"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "marg"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "cairo"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "Egypt"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+2 01065484974",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ShopResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
                     },
                     "name": {
                         "type": "string",
@@ -1587,7 +2103,7 @@
                     },
                     "bank_name": {
                         "type": "string",
-                        "example": "bank misr"
+                        "example": "bank name"
                     },
                     "bank_code": {
                         "type": "string",
@@ -1765,6 +2281,10 @@
         {
             "name": "My Profile",
             "description": "My Profile"
+        },
+        {
+            "name": "Shops",
+            "description": "Shops"
         }
     ]
 }

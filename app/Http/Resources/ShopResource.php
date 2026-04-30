@@ -11,7 +11,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     schema="ShopResource",
  *     type="object",
  *     @OA\Property(property="id", type="integer",example=1),
- *     @OA\Property(property="image_path", type="string", example="image path"),
  *     @OA\Property(property="name", type="string", example="name"),
  *     @OA\Property(property="email", type="string", example="name@test.com"),
  *     @OA\Property(property="address", type="string", example="shop address"),
@@ -21,7 +20,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="phone", type="string", nullable=true, example="+2 01065484974"),
  *     @OA\Property(property="pincode", type="string", example="shop pincode"),
  *     @OA\Property(property="website", type="string", nullable=true, example="website name"),
- *     @OA\Property(property="bank_name", type="string", example="bank misr"),
+ *     @OA\Property(property="bank_name", type="string", example="bank name"),
  *     @OA\Property(property="bank_code", type="string", example="bank code"),
  *     @OA\Property(property="bank_address", type="string", example="bank address"),
  *     @OA\Property(property="bank_country", type="string", example="Egypt"),
@@ -34,6 +33,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
 */
 class ShopResource extends JsonResource
 {
+    protected string $mode;
+
+    public function __construct(mixed $resource, string $mode = 'full')
+    {
+        parent::__construct($resource);
+        $this->mode = $mode;
+    }
     /**
      * Transform the resource into an array.
      *
@@ -61,7 +67,7 @@ class ShopResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
-            'user' => $this->whenLoaded('user',fn() => new UserResource($this->product))
+            'user' => $this->whenLoaded('user',fn() => new UserResource($this->user))
         ];
     }
 }
