@@ -55,6 +55,5 @@ class CategoryService
             );
         }
         return $this->categoryRepository->delete($category);
-        return true;
     }
 }

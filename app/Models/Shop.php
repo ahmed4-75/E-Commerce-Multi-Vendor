@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shop extends Model
 {
@@ -37,5 +38,13 @@ class Shop extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class,'user_id');
+    }
+
+    /**
+     * Get the products for the shop.
+    */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class, 'shop_id');
     }
 }
