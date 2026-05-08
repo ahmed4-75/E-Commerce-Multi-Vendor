@@ -29,16 +29,16 @@ class UpdateShopRequest extends FormRequest
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'country' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20|unique:shops,phone,' . $id,
             'email' => 'required|email|unique:shops,email,' . $id,
-            'pincode' => 'required|string|max:50',
-            'website' => 'nullable|string|max:255',
+            'pincode' => 'required|string|max:50|unique:shops,pincode,' . $id,
+            'website' => 'nullable|string|max:255|unique:shops,website,' . $id,
             'bank_name' => 'required|string|max:255',
             'bank_code' => 'required|string|max:255',
             'bank_country' => 'required|string|max:255',
             'bank_address' => 'required|string',
             'account_name' => 'required|string|max:255',
-            'account_number' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255|unique:shops,account_number,' . $id
         ];
     }
 }

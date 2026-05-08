@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
             $table->text('content');
             $table->foreignId("product_id")->constrained("products")->cascadeOnDelete();
+            $table->string('lang');
             $table->timestamps();
         });
     }

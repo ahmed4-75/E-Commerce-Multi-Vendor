@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\CreateCategoryRequest;
 use App\Http\Requests\LanguageRequest;
 use App\Http\Resources\CategoryResource;
@@ -22,10 +21,10 @@ class CategoriesController extends Controller
      *     tags={"Categories"},
      *     summary="Show categories",
      *     description="Returns the categories based on a language",
-     *     @OA\Parameter(name="lang", in="query", required=true, description="language", @OA\Schema(type="string", enum={"ar","en","ur","sp"})),
+     *     @OA\Parameter(name="lang", in="query", required=true, description="language", @OA\Schema(type="string", ref="#/components/schemas/LanguagesEnum", example="en")),
      *     security={{"sanctum":{}}},
-     * 
-     * 
+     *
+     *
      *     @OA\Response(
      *         response=200,
      *         description="All categories",
@@ -35,7 +34,7 @@ class CategoriesController extends Controller
      *             @OA\Property(property="message", type="string", example="All categories")
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=404,
      *         description="categories does not exist",
@@ -44,7 +43,7 @@ class CategoriesController extends Controller
      *             @OA\Property(property="message", type="string", example="The categories for this language does not exist")
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error"
@@ -78,21 +77,22 @@ class CategoriesController extends Controller
      *     summary="Crete category",
      *     description="create the category",
      *     security={{"sanctum":{}}},
-     * 
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"name","description","lang","image_path"},
-     *                 @OA\Property(property="name", type="string", example="devices"),
-     *                 @OA\Property(property="description", type="string", example="devices description"),
-     *                 @OA\Property(property="lang", type="string", enum={"ar","en","ur","sp"}, example="ar"),
-     *                 @OA\Property(property="image_path", type="string", format="binary", description="file|mimes:pdf,jpeg,jpg,png|max:6120", example="category_image.jpg")
+     *                 required={"name", "description", "lang", "image_path"},
+     *
+     *                 @OA\Property(property="name", type="string", example="Electronics",description="Must be unique in translations table"),
+     *                 @OA\Property(property="description", type="string", example="All electronic products",description="Must be unique in translations table"),
+     *                 @OA\Property(property="lang",type="string",ref="#/components/schemas/LanguagesEnum",description="Value from LanguagesEnum",example="en"),
+     *                 @OA\Property(property="image_path",type="string",format="binary",description="File: pdf, jpeg, jpg, png — max 6MB")
      *             )
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Create category",
@@ -101,7 +101,7 @@ class CategoriesController extends Controller
      *             @OA\Property(property="message", type="string", example="Category Created Successfully"),
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error"
@@ -121,14 +121,14 @@ class CategoriesController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/categories/show/{id}",
+     *     path="/api/category/show/{id}",
      *     tags={"Categories"},
      *     summary="Show a category",
      *     description="Returns a category based on a language",
      *     @OA\Parameter(name="id", in="path", required=true, description="category id", @OA\Schema(type="integer", example=1)),
-     *     @OA\Parameter(name="lang", in="query", required=true, description="language", @OA\Schema(type="string", enum={"ar","en","ur","sp"})),
+     *     @OA\Parameter(name="lang", in="query", required=true, description="language", @OA\Schema(type="string", ref="#/components/schemas/LanguagesEnum", example="en")),
      *     security={{"sanctum":{}}},
-     * 
+     *
      *     @OA\Response(
      *         response=200,
      *         description="show a Category",
@@ -138,16 +138,16 @@ class CategoriesController extends Controller
      *             @OA\Property(property="message", type="string", example="Show Category")
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=404,
      *         description="category does not exist",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", example="Error"),
-     *             @OA\Property(property="message", type="string", example="The category for this language does not exist")
+     *             @OA\Property(property="message", type="string", example="The category does not exist or for this language")
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error"
@@ -159,13 +159,6 @@ class CategoriesController extends Controller
         $lang = $request->validated('lang') ?? Auth::user()?->lang;
 
         $category = $this->categoryService->show($lang ,$id);
-
-        if (!$category) {
-            return response()->json([
-                'status' => 'Error',
-                'message' => 'The category for this language does not exist'
-            ], 404);
-        }
 
         return response()->json([
             'data' => new CategoryResource($category),
@@ -182,21 +175,22 @@ class CategoriesController extends Controller
      *     description="Returns a category based on a language",
      *     @OA\Parameter(name="id", in="path", required=true, description="category id", @OA\Schema(type="integer", example=1)),
      *     security={{"sanctum":{}}},
-     * 
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"translation_id","name","description","image_path"},
-     *                 @OA\Property(property="translation_id", type="integer", description="exists:translations,id", example=2),
-     *                 @OA\Property(property="name", type="string", description="unique:translations,name,$id", example="devices"),
-     *                 @OA\Property(property="description", type="string", example="devices description"),
-     *                 @OA\Property(property="image_path", type="string", format="binary", description="file|mimes:pdf,jpeg,jpg,png|max:6120", example="category_image.jpg")
+     *                 required={"translation_id", "name", "description", "image_path"},
+     *
+     *                 @OA\Property(property="translation_id", type="integer", example=1,description="Must belong to the category being updated (translationable_id = route id, translationable_type = Category)"),
+     *                 @OA\Property(property="name", type="string", example="Electronics",description="Must be unique in translations table except for the current translation_id"),
+     *                 @OA\Property(property="description", type="string", example="All electronic products",description="Must be unique in translations table except for the current translation_id"),
+     *                 @OA\Property(property="image_path",type="string",format="binary",description="File: pdf, jpeg, jpg, png — max 6MB")
      *             )
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=200,
      *         description="update a Category",
@@ -205,7 +199,7 @@ class CategoriesController extends Controller
      *             @OA\Property(property="message", type="string", example="Category Updated Successfully")
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Category not found",
@@ -214,7 +208,7 @@ class CategoriesController extends Controller
      *             @OA\Property(property="message", type="string", example="Category not found")
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error"
@@ -240,7 +234,7 @@ class CategoriesController extends Controller
      *     description="Delete a category and all translation ",
      *     @OA\Parameter(name="id", in="path", required=true, description="category id", @OA\Schema(type="integer", example=1)),
      *     security={{"sanctum":{}}},
-     * 
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Delete Category Success",
@@ -249,7 +243,7 @@ class CategoriesController extends Controller
      *             @OA\Property(property="message", type="string", example="Category deleted successfully")
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Category not found",
@@ -258,7 +252,7 @@ class CategoriesController extends Controller
      *             @OA\Property(property="message", type="string", example="Category does not exist")
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=409,
      *         description="Delete Category fail",
@@ -273,14 +267,14 @@ class CategoriesController extends Controller
     {
         try {
             $this->categoryService->delete($id);
-    
+
             return response()->json([
                 'status' => 'Success',
                 'message' => 'Category deleted successfully',
             ], 200);
-    
+
         } catch (\Exception $e) {
-    
+
             return response()->json([
                 'status' => 'Error',
                 'message' => $e->getMessage(),

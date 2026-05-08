@@ -320,14 +320,7 @@
                                         "example": "+201234567890"
                                     },
                                     "lang": {
-                                        "type": "string",
-                                        "example": "en",
-                                        "enum": [
-                                            "ar",
-                                            "en",
-                                            "ur",
-                                            "sp"
-                                        ]
+                                        "$ref": "#/components/schemas/LanguagesEnum"
                                     },
                                     "favicon": {
                                         "description": "file|mimes:pdf,jpeg,jpg,png|max:6120",
@@ -393,7 +386,7 @@
                                         "description": "email|exists:users,email",
                                         "type": "string",
                                         "format": "email",
-                                        "example": "user@example.com"
+                                        "example": "ahmed@example.com"
                                     },
                                     "otp": {
                                         "description": "6 digit OTP code",
@@ -519,13 +512,7 @@
                         "description": "language",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "enum": [
-                                "ar",
-                                "en",
-                                "ur",
-                                "sp"
-                            ]
+                            "$ref": "#/components/schemas/LanguagesEnum"
                         }
                     }
                 ],
@@ -608,28 +595,22 @@
                                 ],
                                 "properties": {
                                     "name": {
+                                        "description": "Must be unique in translations table",
                                         "type": "string",
-                                        "example": "devices"
+                                        "example": "Electronics"
                                     },
                                     "description": {
+                                        "description": "Must be unique in translations table",
                                         "type": "string",
-                                        "example": "devices description"
+                                        "example": "All electronic products"
                                     },
                                     "lang": {
-                                        "type": "string",
-                                        "example": "ar",
-                                        "enum": [
-                                            "ar",
-                                            "en",
-                                            "ur",
-                                            "sp"
-                                        ]
+                                        "$ref": "#/components/schemas/LanguagesEnum"
                                     },
                                     "image_path": {
-                                        "description": "file|mimes:pdf,jpeg,jpg,png|max:6120",
+                                        "description": "File: pdf, jpeg, jpg, png — max 6MB",
                                         "type": "string",
-                                        "format": "binary",
-                                        "example": "category_image.jpg"
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -669,14 +650,14 @@
                 ]
             }
         },
-        "/api/categories/show/{id}": {
+        "/api/category/show/{id}": {
             "get": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "Show a category",
                 "description": "Returns a category based on a language",
-                "operationId": "7efb1426b6cf5351a100fd4d07c65ede",
+                "operationId": "70dbfa654b5b3744b047da4d9201e909",
                 "parameters": [
                     {
                         "name": "id",
@@ -694,13 +675,7 @@
                         "description": "language",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "enum": [
-                                "ar",
-                                "en",
-                                "ur",
-                                "sp"
-                            ]
+                            "$ref": "#/components/schemas/LanguagesEnum"
                         }
                     }
                 ],
@@ -740,7 +715,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "The category for this language does not exist"
+                                            "example": "The category does not exist or for this language"
                                         }
                                     },
                                     "type": "object"
@@ -792,24 +767,24 @@
                                 ],
                                 "properties": {
                                     "translation_id": {
-                                        "description": "exists:translations,id",
+                                        "description": "Must belong to the category being updated (translationable_id = route id, translationable_type = Category)",
                                         "type": "integer",
-                                        "example": 2
+                                        "example": 1
                                     },
                                     "name": {
-                                        "description": "unique:translations,name,$id",
+                                        "description": "Must be unique in translations table except for the current translation_id",
                                         "type": "string",
-                                        "example": "devices"
+                                        "example": "Electronics"
                                     },
                                     "description": {
+                                        "description": "Must be unique in translations table except for the current translation_id",
                                         "type": "string",
-                                        "example": "devices description"
+                                        "example": "All electronic products"
                                     },
                                     "image_path": {
-                                        "description": "file|mimes:pdf,jpeg,jpg,png|max:6120",
+                                        "description": "File: pdf, jpeg, jpg, png — max 6MB",
                                         "type": "string",
-                                        "format": "binary",
-                                        "example": "category_image.jpg"
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -943,6 +918,853 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Can not delete the category because it has related products. Move the products or Delete Them."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/comments/create": {
+            "post": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Create a new comment",
+                "operationId": "df5494e3209f75c63a7c70abceabc353",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content",
+                                    "lang",
+                                    "product_id",
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "This is a great product!"
+                                    },
+                                    "lang": {
+                                        "$ref": "#/components/schemas/LanguagesEnum"
+                                    },
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Comment created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Comment created successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/comments/update/{id}": {
+            "put": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Update an existing comment",
+                "operationId": "e1f3055d40343ce2765edba45954dae7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Comment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Updated comment content"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Comment updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Comment updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Comment not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/comments/delete/{id}": {
+            "delete": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Delete a comment",
+                "operationId": "d7f03c26a1300095c975061f0906eecf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Comment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Comment deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Comment deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Comment not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/products/{id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Show products by category",
+                "description": "Returns products for a category based on a language",
+                "operationId": "2581d92476e2cfc44e3edd682c1fb8b0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "category id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "description": "language",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/LanguagesEnum"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProductResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "properties": {
+                                                "first": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/products?page=1"
+                                                },
+                                                "last": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/products?page=5"
+                                                },
+                                                "prev": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "next": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/products?page=2",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "path": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/products"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": "string",
+                                                                "example": "http://localhost/Ecommerce/public/api/products?page=1",
+                                                                "nullable": true
+                                                            },
+                                                            "label": {
+                                                                "type": "string",
+                                                                "example": "1"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "All products"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "products does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The products for this category or language does not exist"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/product/show/{id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Show a product",
+                "description": "Returns one product based on a language",
+                "operationId": "7104def183df16d2e66551ad6d0a3bcc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "product id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "description": "language",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/LanguagesEnum"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Show product",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "product": {
+                                                    "$ref": "#/components/schemas/ProductResource"
+                                                },
+                                                "comments": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/CommentResource"
+                                                    }
+                                                },
+                                                "links": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "http://example.com/api/products/show/1?page=1"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "http://example.com/api/products/show/1?page=5"
+                                                        },
+                                                        "prev": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "http://example.com/api/products/show/1?page=2",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "meta": {
+                                                    "properties": {
+                                                        "current_page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "from": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "last_page": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "path": {
+                                                            "type": "string",
+                                                            "example": "http://example.com/api/products/show/1"
+                                                        },
+                                                        "links": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "properties": {
+                                                                    "url": {
+                                                                        "type": "string",
+                                                                        "example": "http://localhost/Ecommerce/public/api/products/show/1?page=1",
+                                                                        "nullable": true
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string",
+                                                                        "example": "1"
+                                                                    },
+                                                                    "active": {
+                                                                        "type": "boolean",
+                                                                        "example": true
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "show product"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "product does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/products/create": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Create product",
+                "description": "Create a new product",
+                "operationId": "8005259ba70c8eba00515a8eb97afed7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "description",
+                                    "lang",
+                                    "quantity",
+                                    "price",
+                                    "category_id",
+                                    "shop_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Product Name"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Product description"
+                                    },
+                                    "lang": {
+                                        "$ref": "#/components/schemas/LanguagesEnum"
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 10,
+                                        "minimum": 0
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 99.99
+                                    },
+                                    "discount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10,
+                                        "nullable": true
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "shop_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "page_name",
+                                                "image_path"
+                                            ],
+                                            "properties": {
+                                                "page_name": {
+                                                    "$ref": "#/components/schemas/PagesNamesEnum"
+                                                },
+                                                "image_path": {
+                                                    "type": "string",
+                                                    "format": "binary"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Create product",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product Created Successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/products/update/{id}": {
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Update product",
+                "description": "Update an existing product",
+                "operationId": "0286da57c1b2071e63a08f0d0c4fe2b4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "product id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "translation_id",
+                                    "name",
+                                    "description",
+                                    "quantity",
+                                    "price",
+                                    "category_id",
+                                    "shop_id"
+                                ],
+                                "properties": {
+                                    "translation_id": {
+                                        "description": "Must belong to the product being updated (translationable_id = route id, translationable_type = Product)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Product Name"
+                                    },
+                                    "description": {
+                                        "description": "Must be unique in translations table except for the current translation_id",
+                                        "type": "string",
+                                        "example": "Updated description"
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 10,
+                                        "minimum": 0
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 99.99
+                                    },
+                                    "discount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10,
+                                        "nullable": true
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "shop_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "page_name",
+                                                "image_path"
+                                            ],
+                                            "properties": {
+                                                "page_name": {
+                                                    "$ref": "#/components/schemas/PagesNamesEnum"
+                                                },
+                                                "image_path": {
+                                                    "type": "string",
+                                                    "format": "binary"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update product",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product Updated Successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product does not exist"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/products/delete/{id}": {
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Delete product",
+                "description": "Delete a product with all translations and images",
+                "operationId": "b4d488d87ab629e5365614c5673841db",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "product id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Delete product success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product does not exist"
                                         }
                                     },
                                     "type": "object"
@@ -1115,14 +1937,7 @@
                                         "example": "+201012345678"
                                     },
                                     "lang": {
-                                        "type": "string",
-                                        "example": "ar",
-                                        "enum": [
-                                            "ar",
-                                            "en",
-                                            "ur",
-                                            "sp"
-                                        ]
+                                        "$ref": "#/components/schemas/LanguagesEnum"
                                     },
                                     "favicon": {
                                         "description": "file|mimes:pdf,jpeg,jpg,png|max:6120",
@@ -1231,6 +2046,83 @@
                                             "items": {
                                                 "$ref": "#/components/schemas/ShopBasicResource"
                                             }
+                                        },
+                                        "links": {
+                                            "properties": {
+                                                "first": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/shops?page=1"
+                                                },
+                                                "last": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/shops?page=5"
+                                                },
+                                                "prev": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "next": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/shops?page=2",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "path": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/shops"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": "string",
+                                                                "example": "http://localhost/Ecommerce/public/api/shops?page=1",
+                                                                "nullable": true
+                                                            },
+                                                            "label": {
+                                                                "type": "string",
+                                                                "example": "1"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
                                         },
                                         "status": {
                                             "type": "string",
@@ -1456,14 +2348,14 @@
                 ]
             }
         },
-        "/api/shops/update/{id}": {
+        "/api/shop/update/{id}": {
             "put": {
                 "tags": [
                     "Shops"
                 ],
                 "summary": "Update shop",
                 "description": "Update an existing shop",
-                "operationId": "a062425c89106992c1538059d7bda889",
+                "operationId": "d8522a67befb9a321e5f463850977330",
                 "parameters": [
                     {
                         "name": "id",
@@ -1700,6 +2592,25 @@
     },
     "components": {
         "schemas": {
+            "LanguagesEnum": {
+                "type": "string",
+                "enum": [
+                    "ar",
+                    "en",
+                    "sp",
+                    "ur"
+                ]
+            },
+            "PagesNamesEnum": {
+                "type": "string",
+                "enum": [
+                    "page_a",
+                    "page_b",
+                    "page_c",
+                    "page_d",
+                    "page_f"
+                ]
+            },
             "CartResource": {
                 "properties": {
                     "id": {
@@ -1800,6 +2711,10 @@
                     "content": {
                         "type": "string",
                         "example": "comment content"
+                    },
+                    "lang": {
+                        "type": "string",
+                        "example": "ar"
                     },
                     "created_at": {
                         "type": "string",
@@ -1975,6 +2890,10 @@
                         "type": "number",
                         "example": 10.6
                     },
+                    "discount": {
+                        "type": "number",
+                        "example": 2.6
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time"
@@ -1990,7 +2909,7 @@
                         "$ref": "#/components/schemas/CategoryResource"
                     },
                     "shop": {
-                        "$ref": "#/components/schemas/ShopResource"
+                        "$ref": "#/components/schemas/ShopBasicResource"
                     },
                     "translation": {
                         "$ref": "#/components/schemas/TranslationResource"
@@ -2277,6 +3196,14 @@
         {
             "name": "Categories",
             "description": "Categories"
+        },
+        {
+            "name": "Comments",
+            "description": "Comments"
+        },
+        {
+            "name": "Products",
+            "description": "Products"
         },
         {
             "name": "My Profile",

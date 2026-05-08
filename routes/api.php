@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginNoPasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\CommentsController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShopsController;
 use App\Http\Controllers\TestController;
@@ -24,20 +26,30 @@ Route::post('/forgot-password',[LoginNoPasswordController::class,'forgotPassword
 Route::post('/reset-password',[LoginNoPasswordController::class,'resetPassword'],);
 
 Route::middleware(['auth:sanctum'])->group(function(){
-    Route::get('/profile',[ProfileController::class,'index']);  
+    Route::get('/profile',[ProfileController::class,'index']);
     Route::post('/profile/update',[ProfileController::class,'update']);
     Route::put('/profile/update-password',[ProfileController::class,'updatePassword']);
     Route::post('/logout',[ProfileController::class,'logout']);
 
     Route::get('/categories',[CategoriesController::class, 'index']);
     Route::post('/categories/create',[CategoriesController::class, 'store']);
-    Route::get('/categories/show/{id}',[CategoriesController::class, 'show']);
+    Route::get('/category/show/{id}',[CategoriesController::class, 'show']);
     Route::post('/categories/update/{id}',[CategoriesController::class, 'update']);
     Route::delete('/categories/delete/{id}',[CategoriesController::class, 'delete']);
 
     Route::get('/shops',[ShopsController::class, 'index']);
-    Route::get('/shops/show/{id}',[ShopsController::class, 'show']);
+    Route::get('/shop/show/{id}',[ShopsController::class, 'show']);
     Route::post('/shops/create',[ShopsController::class, 'store']);
     Route::put('/shops/update/{id}',[ShopsController::class, 'update']);
     Route::delete('/shops/delete/{id}',[ShopsController::class, 'delete']);
+
+    Route::get('/products/{id}',[ProductsController::class, 'index']);
+    Route::get('/product/show/{id}',[ProductsController::class, 'show']);
+    Route::post('/products/create',[ProductsController::class, 'store']);
+    Route::post('/products/update/{id}',[ProductsController::class, 'update']);
+    Route::delete('/products/delete/{id}',[ProductsController::class, 'delete']);
+
+    Route::post('/comments/create',[CommentsController::class, 'store']);
+    Route::put('/comments/update/{id}',[CommentsController::class, 'update']);
+    Route::delete('/comments/delete/{id}',[CommentsController::class, 'delete']);
 });

@@ -18,17 +18,17 @@ return new class extends Migration
             $table->string('city');
             $table->string('state');
             $table->string('country');
-            $table->string('phone')->nullable();
-            $table->string('email');
+            $table->string('phone')->nullable()->unique();
+            $table->string('email')->unique();
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
-            $table->string('pincode');
-            $table->string('website')->nullable();
+            $table->string('pincode')->unique();
+            $table->string('website')->nullable()->unique();
             $table->string('bank_name');
             $table->string('bank_code');
             $table->string('bank_country');
             $table->string('bank_address');
             $table->string('account_name');
-            $table->string('account_number');
+            $table->string('account_number')->unique();
             $table->timestamps();
         });
     }

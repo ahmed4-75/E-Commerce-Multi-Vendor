@@ -123,7 +123,7 @@ class ProfileController extends Controller
      *                 @OA\Property(property="name", type="string", maxLength=50, example="Ahmed Morgan"),
      *                 @OA\Property(property="email", type="string", format="email", description="email|unique:users,email except email authenticated user", example="ahmed@example.com"),
      *                 @OA\Property(property="phone", type="string", description="phone:AUTO|unique:users,phone except phone authenticated user", example="+201012345678"),
-     *                 @OA\Property(property="lang", type="string", enum={"ar","en","ur","sp"}, example="ar"),
+     *                 @OA\Property(property="lang", type="string", ref="#/components/schemas/LanguagesEnum", example="en"),
      *                 @OA\Property(property="favicon", type="string", format="binary", description="file|mimes:pdf,jpeg,jpg,png|max:6120", example="user_favicon.jpg")
      *             )
      *         )
@@ -160,12 +160,12 @@ class ProfileController extends Controller
             'lang' => $request->lang
         ]);
         if($request->hasFile('favicon')){
-            if (Storage::exists('favicons/'.$user->favicon)) {
-                Storage::delete('favicons/'.$user->favicon);
+            if (Storage::disk('local')->exists('favicons/'.$user->favicon)) {
+                Storage::disk('local')->delete('favicons/'.$user->favicon);
             }
             $file = $request->file('favicon');
             $fileName = $user->id."_".Str::slug($user->name)."_favicon.".$file->getClientOriginalExtension();
-            $file->storeAs("favicons",$fileName,"private");
+            $file->storeAs("favicons",$fileName,"local");
             $user->update(['favicon' => $fileName]);
         }
 
