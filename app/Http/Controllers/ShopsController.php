@@ -27,6 +27,35 @@ class ShopsController extends Controller
      *         description="All shops",
      *         @OA\JsonContent(
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/ShopBasicResource")),
+     *             @OA\Property(
+     *                 property="links",
+     *                 type="object",
+     *                 @OA\Property(property="first", type="string", example="http://example.com/api/shops?page=1"),
+     *                 @OA\Property(property="last", type="string", example="http://example.com/api/shops?page=5"),
+     *                 @OA\Property(property="prev", type="string", nullable=true, example=null),
+     *                 @OA\Property(property="next", type="string", nullable=true, example="http://example.com/api/shops?page=2")
+     *             ),
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="from", type="integer", example=1),
+     *                 @OA\Property(property="last_page", type="integer", example=5),
+     *                 @OA\Property(property="path", type="string", example="http://example.com/api/shops"),
+     *                 @OA\Property(
+     *                     property="links",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="url", type="string", nullable=true, example="http://localhost/Ecommerce/public/api/shops?page=1"),
+     *                         @OA\Property(property="label", type="string", example="1"),
+     *                         @OA\Property(property="active", type="boolean", example=true)
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="per_page", type="integer", example=20),
+     *                 @OA\Property(property="to", type="integer", example=20),
+     *                 @OA\Property(property="total", type="integer", example=50)
+     *             ),
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="All shops")
      *         )
@@ -36,12 +65,46 @@ class ShopsController extends Controller
     public function index()
     {
         $shops = $this->shopService->index();
-        return response()->json(
-            [
-                'data' =>  ShopBasicResource::collection($shops),
-                'status' => 'Success',
-                'message' => 'All shops',
-            ], 200);
+
+        return ShopBasicResource::collection($shops)->additional([
+            'status' => 'Success',
+            'message' => 'All shops',
+        ]);
+        # manually pagination
+        // $metaLinks = $shops->linkCollection()
+        // ->map(
+        //     function ($link) {
+        //         return [
+        //             'url' => $link['url'],
+        //             'label' => $link['label'],   # e.g. "&laquo; Previous", "1", "Next &raquo;"
+        //             'active' => $link['active'],
+        //         ];
+        //     }
+        // )->values()->all();
+        // $links = [
+        //     'first' => $shops->url(1),
+        //     'last' => $shops->url($shops->lastPage()),
+        //     'prev' => $shops->previousPageUrl(),
+        //     'next' => $shops->nextPageUrl(),
+        // ];
+        // $meta = [
+        //     'current_page' => $shops->currentPage(),
+        //     'from' => $shops->firstItem(),
+        //     'last_page' => $shops->lastPage(),
+        //     'path' => $shops->path(),
+        //     'links' => $metaLinks,
+        //     'per_page' => $shops->perPage(),
+        //     'to' => $shops->lastItem(),
+        //     'total' => $shops->total(),
+        // ];
+
+        // return response()->json([
+        //     'data' => ShopBasicResource::collection($shops),
+        //     'links' => $links,
+        //     'meta' => $meta,
+        //     'status' => 'Success',
+        //     'message' => 'All shops',
+        // ], 200);
     }
 
     /**
@@ -76,13 +139,6 @@ class ShopsController extends Controller
     public function show(int $id)
     {
         $shop = $this->shopService->show($id);
-
-        if (!$shop) {
-            return response()->json([
-                'status' => 'Error',
-                'message' => 'Shop not found',
-            ], 404);
-        }
 
         return response()->json([
             'data' => new ShopResource($shop),
@@ -148,7 +204,7 @@ class ShopsController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/shops/update/{id}",
+     *     path="/api/shop/update/{id}",
      *     tags={"Shops"},
      *     summary="Update shop",
      *     description="Update an existing shop",

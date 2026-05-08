@@ -27,16 +27,16 @@ class CreateShopRequest extends FormRequest
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'country' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20|unique:shops,phone',
             'email' => 'required|email|unique:shops,email',
-            'pincode' => 'required|string|max:50',
-            'website' => 'nullable|string|max:255',
+            'pincode' => 'required|string|max:50|unique:shops,pincode',
+            'website' => 'nullable|string|max:255|unique:shops,website',
             'bank_name' => 'required|string|max:255',
             'bank_code' => 'required|string|max:255',
             'bank_address' => 'required|string',
             'bank_country' => 'required|string|max:255',
             'account_name' => 'required|string|max:255',
-            'account_number' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255|unique:shops,account_number',
         ];
     }
 }

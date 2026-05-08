@@ -41,7 +41,7 @@ class CategoryService
         $file = $request->file('image_path');
         $fileName = Str::slug($request->name)."_category.".$file->getClientOriginalExtension();
         $file->storeAs("categories",$fileName);
-
+        
         return $this->categoryRepository->update($request, $category, $fileName);
     }
 

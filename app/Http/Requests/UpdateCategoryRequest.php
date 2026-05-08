@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\LanguagesEnum;
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class UpdateCategoryRequest extends FormRequest
 {
@@ -24,10 +24,18 @@ class UpdateCategoryRequest extends FormRequest
     public function rules(): array
     {
         $id = $this->translation_id;
+        $categoryId = (int) $this->route('id');
         return [
-            'translation_id' => 'required|exists:translations,id',
+            'translation_id' => [
+                'required',
+                Rule::exists('translations', 'id')->where(function ($query) use ($categoryId) {
+                    return $query
+                        ->where('translationable_id', $categoryId)
+                        ->where('translationable_type', Category::class);
+                }),
+            ],
             'name' => 'required|string|unique:translations,name,'.$id,
-            'description' => 'required|string',
+            'description' => 'required|string|unique:translations,description,'.$id,
             'image_path' => 'required|file|mimes:pdf,jpeg,jpg,png|max:6120'
         ];
     }

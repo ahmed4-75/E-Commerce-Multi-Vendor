@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     type="object",
  *     @OA\Property(property="id", type="integer",example=1),
  *     @OA\Property(property="content", type="string", example="comment content"),
+ *     @OA\Property(property="lang", type="string", example="ar"),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
  *     @OA\Property(property="user", description="Loaded only if relation user is loaded", ref="#/components/schemas/UserResource"),
@@ -30,6 +31,7 @@ class CommentResource extends JsonResource
         return [
             'id' => $this->id,
             'content' => $this->content,
+            'lang' => $this->lang,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 

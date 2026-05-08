@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('translations', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
+            $table->text('description')->unique();
             $table->string('lang');
             $table->morphs('translationable');
             $table->unique(['lang','translationable_id', 'translationable_type']);

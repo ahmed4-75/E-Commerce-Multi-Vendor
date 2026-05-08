@@ -31,30 +31,29 @@ class CategoryRepository implements CategoryInterface
 
     public function show(string $lang ,int $id)
     {
-        return Category::where('id',$id)->whereHas('translations', function ($q) use ($lang) { $q->where('lang', $lang); })
+        return Category::whereKey($id)->whereHas('translations', function ($q) use ($lang) { $q->where('lang', $lang); })
             ->with([ 'translations' => function ($q) use ($lang) { $q->where('lang', $lang); } ])
-        ->first();
+        ->firstOrFail();
     }
 
     public function update(UpdateCategoryRequest $request , Category $category, string $fileName)
     {
-        $category->update([ 'image_path' => $fileName ]);
+        if($fileName != $category->image_path){
+            $category->update([ 'image_path' => $fileName ]);
+        }
 
         $category->translations()->where('id', $request->translation_id)->update
         ([
             'name' => $request->name,
             'description' => $request->description,
         ]);
-
-        return $category;
     }
 
 
     public function delete(Category $category)
-    {    
+    {
         Storage::delete('categories/'.$category->image_path);
         $category->translations()->delete();
-        $category->delete();
-        return true;
+        return Category::destroy($category->id);
     }
 }

@@ -21,7 +21,7 @@ class VerifyEmailController extends Controller
  *         required=true,
  *         @OA\JsonContent(
  *             required={"email","otp"},
- *             @OA\Property(property="email",type="string",format="email",description="email|exists:users,email",example="user@example.com"),
+ *             @OA\Property(property="email",type="string",format="email",description="email|exists:users,email",example="ahmed@example.com"),
  *             @OA\Property(property="otp",type="array",description="6 digit OTP code",@OA\Items(type="integer", example=1),example={1,2,3,4,5,6})
  *         )
  *     ),

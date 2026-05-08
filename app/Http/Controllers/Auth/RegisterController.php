@@ -32,7 +32,7 @@ class RegisterController extends Controller
  *                 @OA\Property(property="password", type="string", format="password", minLength=6, example="123456"),
  *                 @OA\Property(property="password_confirmation", type="string", format="password", example="123456"),
  *                 @OA\Property(property="phone", type="string", description="phone|unique:users,phone", example="+201234567890"),
- *                 @OA\Property(property="lang", type="string", enum={"ar","en","ur","sp"}, example="en"),
+ *                 @OA\Property(property="lang", type="string", ref="#/components/schemas/LanguagesEnum", example="en"),
  *                 @OA\Property(property="favicon", type="string", format="binary", description="file|mimes:pdf,jpeg,jpg,png|max:6120", example="user_favicon.jpg")
  *             )
  *         )

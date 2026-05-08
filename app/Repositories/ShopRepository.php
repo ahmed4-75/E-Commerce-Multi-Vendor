@@ -12,12 +12,12 @@ class ShopRepository implements ShopInterface
 {
     public function index()
     {
-        return Shop::query()->select(['id','name','email','address','city','state','country','phone'])->get();
+        return Shop::query()->select(['id','name','email','address','city','state','country','phone'])->paginate(20);
     }
 
     public function show(int $id)
     {
-        return Shop::with('user')->find($id);
+        return Shop::with('user')->findOrFail($id);
     }
 
     public function store(CreateShopRequest $request)
@@ -67,7 +67,6 @@ class ShopRepository implements ShopInterface
 
     public function delete(Shop $shop)
     {
-        $shop->delete();
-        return true;
+        return Shop::destroy($shop->id);
     }
 }

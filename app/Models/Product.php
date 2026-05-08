@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
+    
     /**
      * The attributes that are mass assignable.
      *
@@ -18,6 +19,7 @@ class Product extends Model
     protected $fillable = [
         'quantity',
         'price',
+        'discount',
         'category_id',
         'user_id',
         'shop_id'
@@ -76,7 +78,7 @@ class Product extends Model
     */
     public function carts(): BelongsToMany
     {
-        return $this->belongsToMany(Cart::class,'products_carts','product_id','cart_id')->withPivot('quantity','price')->as('item');
+        return $this->belongsToMany(Cart::class,'products_carts','product_id','cart_id')->withPivot(['quantity','price'])->as('item');
     }
 
     /**

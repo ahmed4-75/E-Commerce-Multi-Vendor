@@ -6,7 +6,7 @@ use App\Enums\LanguagesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
-class CreateCategoryRequest extends FormRequest
+class CreateCommentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +24,9 @@ class CreateCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:translations,name',
-            'description' => 'required|string|unique:translations,description',
+            'content' => 'required|string',
             'lang' => ['required',new Enum(LanguagesEnum::class)],
-            'image_path' => 'required|file|mimes:pdf,jpeg,jpg,png|max:6120'
+            'product_id' => 'required|exists:products,id'
         ];
     }
 }
