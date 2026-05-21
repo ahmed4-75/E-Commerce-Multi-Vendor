@@ -19,12 +19,13 @@ return new class extends Migration
             $table->text('address');
             $table->string('phone')->nullable();
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
+            $table->string('lang');
             $table->decimal('amount',8,2);
             $table->string('currency')->default('EGP');
             $table->string('status')->default('pending');
             $table->text('note')->nullable();
-            $table->string('payment_gateway')->nullable();
-            $table->integer('gateway_order_id')->nullable();
+            $table->string('payment_gateway');
+            $table->string('gateway_order_id')->nullable();
             $table->string('transaction_id')->nullable();
             $table->timestamps();
         });

@@ -7,12 +7,28 @@ use App\Http\Requests\UpdateShopRequest;
 use App\Models\Shop;
 use App\Repositories\Contracts\ShopInterface;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class ShopRepository implements ShopInterface
 {
     public function index()
     {
         return Shop::query()->select(['id','name','email','address','city','state','country','phone'])->paginate(20);
+    }
+
+    public function myShops()
+    {
+        return Shop::query()->where('user_id', Auth::id())->select(['id','name','email','address','city','state','country','phone'])->paginate(20);
+    }
+
+    public function bannedShops()
+    {
+        return Shop::query()->onlyTrashed()->select(['id','name','email','address','city','state','country','phone'])->paginate(20);
+    }
+
+    public function search(Request $request)
+    {
+        return Shop::query()->where('name', 'like', '%' . $request->nameKey . '%')->select(['id','name','email','address','city','state','country','phone'])->paginate(20);
     }
 
     public function show(int $id)
@@ -65,8 +81,20 @@ class ShopRepository implements ShopInterface
         return $shop;
     }
 
+    public function ban(Shop $shop)
+    {
+        Shop::destroy($shop->id);
+        return $shop;
+    }
+
+    public function unban(Shop $shop)
+    {
+        $shop->restore();
+        return $shop;
+    }
+
     public function delete(Shop $shop)
     {
-        return Shop::destroy($shop->id);
+        return $shop->forceDelete();
     }
 }

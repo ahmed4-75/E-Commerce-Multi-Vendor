@@ -5,19 +5,60 @@ namespace App\Repositories;
 use App\Repositories\Contracts\ProductInterface;
 use App\Http\Requests\CreateProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\Shop;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 // use Illuminate\Support\Facades\Storage;
 // use Illuminate\Support\Str;
 
 class ProductRepository implements ProductInterface
 {
-    public function index(string $lang ,int $id)
+    public function index(string $lang ,Category $category)
     {
-        return Product::query()->where('category_id', $id)->whereHas('translations', function ($q) use ($lang) { $q->where('lang', $lang); })
+        return Product::query()->whereBelongsTo($category)->whereHas('translations', function ($q) use ($lang) { $q->where('lang', $lang); })
             ->with([ 'translations' => function ($q) use ($lang) { $q->where('lang', $lang); },'productImages'])
         ->paginate(9);
     }
+
+    public function shopProducts(string $lang ,Shop $shop)
+    {
+        $products = Product::query()->whereBelongsTo($shop);
+        $products_count = $products->count();
+        $productsLang = (clone $products)->whereHas('translations', function ($q) use ($lang) { $q->where('lang', $lang); })
+            ->with([ 'translations' => function ($q) use ($lang) { $q->where('lang', $lang); },'productImages'])
+        ->paginate(9);
+        $productsLang_count = $productsLang->total();
+
+        $productsOtherLanguages = (clone $products)->whereHas('translations', function ($q) use ($lang) { $q->where('lang', '!=', $lang); })
+        ->paginate(9);
+        $productsOtherLanguages_count = $productsOtherLanguages->total();
+
+        return $data = [
+            'productsLang' => $productsLang,
+            'productsLang_count' => $productsLang_count,
+            'productsOtherLanguages' => $productsOtherLanguages,
+            'productsOtherLanguages_count' => $productsOtherLanguages_count,
+            'products_count' => $products_count,
+        ];
+    }
+
+    public function bannedProducts(string $lang)
+    {
+        return Product::query()->onlyTrashed()->whereHas('translations', function ($q) use ($lang) { $q->where('lang', $lang); })
+            ->with([ 'translations' => function ($q) use ($lang) { $q->where('lang', $lang); },'shop','user'])
+        ->paginate(9);
+    }
+
+    public function search(Category $category, string $lang, Request $request)
+    {
+        return Product::query()->whereBelongsTo($category)->whereHas('translations', function ($q) use ($lang, $request) {
+            $q->where('lang', $lang)->where('name', 'like', '%'.$request->nameKey.'%');
+            })->with([ 'translations' => function ($q) use ($lang) { $q->where('lang', $lang); },'productImages'])
+        ->paginate(9);
+    }
+
     public function show(string $lang ,int $id)
     {
         $product = Product::query()->whereKey($id)->whereHas('translations', function ($q) use ($lang) { $q->where('lang', $lang); })
@@ -48,7 +89,7 @@ class ProductRepository implements ProductInterface
             'description' => $request->description,
             'lang' => $request->lang,
         ]);
-
+        return true;
         // foreach ($request->input('images', []) as $index => $imageData) {
         //     $pageName = $imageData['page_name'];
         //     $imageFile = $request->file("images.$index.image_path");
@@ -120,10 +161,19 @@ class ProductRepository implements ProductInterface
         // }
     }
 
+    public function ban(Product $product)
+    {
+        return Product::destroy($product->id);
+    }
+
+    public function unban(Product $product)
+    {
+        return $product->restore();
+    }
+
     public function delete(Product $product)
     {
-
         $product->translations()->delete();
-        return Product::destroy($product->id);
+        return $product->forceDelete();
     }
 }

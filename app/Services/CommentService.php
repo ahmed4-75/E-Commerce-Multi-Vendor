@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Requests\CreateCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Comment;
+use App\Models\Product;
 use App\Repositories\Contracts\CommentInterface;
 
 class CommentService
@@ -15,6 +16,7 @@ class CommentService
 
     public function store (CreateCommentRequest $request)
     {
+        Product::findOrFail($request->product_id);
         return $this->commentRepository->store($request);
     }
 

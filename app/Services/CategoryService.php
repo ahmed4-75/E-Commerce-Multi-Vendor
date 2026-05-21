@@ -34,14 +34,14 @@ class CategoryService
     }
 
     public function update(UpdateCategoryRequest $request ,int $id)
-    {  
+    {
         $category = Category::FindOrFail($id);
 
         Storage::delete('categories/'.$category->image_path);
         $file = $request->file('image_path');
         $fileName = Str::slug($request->name)."_category.".$file->getClientOriginalExtension();
         $file->storeAs("categories",$fileName);
-        
+
         return $this->categoryRepository->update($request, $category, $fileName);
     }
 
@@ -49,7 +49,7 @@ class CategoryService
     {
         $category = Category::findOrFail($id);
 
-        if ($category->products()->exists()) {
+        if ($category->products()->withTrashed()->exists()) {
             throw new \Exception(
                 'Can not delete the category because it has related products. Move the products or delete them.'
             );

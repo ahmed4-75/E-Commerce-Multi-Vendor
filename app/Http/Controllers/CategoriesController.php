@@ -84,7 +84,6 @@ class CategoriesController extends Controller
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 required={"name", "description", "lang", "image_path"},
-     *
      *                 @OA\Property(property="name", type="string", example="Electronics",description="Must be unique in translations table"),
      *                 @OA\Property(property="description", type="string", example="All electronic products",description="Must be unique in translations table"),
      *                 @OA\Property(property="lang",type="string",ref="#/components/schemas/LanguagesEnum",description="Value from LanguagesEnum",example="en"),
@@ -98,7 +97,7 @@ class CategoriesController extends Controller
      *         description="Create category",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", example="Success"),
-     *             @OA\Property(property="message", type="string", example="Category Created Successfully"),
+     *             @OA\Property(property="message", type="string", example="Category Created Successfully, Available only in en ,You must add the other available languages"),
      *         )
      *     ),
      *
@@ -115,7 +114,7 @@ class CategoriesController extends Controller
         return response()->json
         ([
             'status' => 'Success',
-            'message' => 'Category Created Successfully',
+            'message' => 'Category Created Successfully, Available only in '.$request->lang.' ,You must add the other available languages',
         ],200);
     }
 
@@ -125,9 +124,10 @@ class CategoriesController extends Controller
      *     tags={"Categories"},
      *     summary="Show a category",
      *     description="Returns a category based on a language",
+     *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="category id", @OA\Schema(type="integer", example=1)),
      *     @OA\Parameter(name="lang", in="query", required=true, description="language", @OA\Schema(type="string", ref="#/components/schemas/LanguagesEnum", example="en")),
-     *     security={{"sanctum":{}}},
      *
      *     @OA\Response(
      *         response=200,

@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateShopRequest;
 use App\Http\Resources\ShopBasicResource;
 use App\Http\Resources\ShopResource;
 use App\Services\ShopService;
+use Illuminate\Http\Request;
 
 class ShopsController extends Controller
 {
@@ -21,11 +22,13 @@ class ShopsController extends Controller
      *     summary="Show shops",
      *     description="Returns all shops with basic information",
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="page",in="query",description="Page number",required=false,@OA\Schema(type="integer", example=1)),
      *
      *     @OA\Response(
      *         response=200,
      *         description="All shops",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/ShopBasicResource")),
      *             @OA\Property(
      *                 property="links",
@@ -109,6 +112,235 @@ class ShopsController extends Controller
 
     /**
      * @OA\Get(
+     *     path="/api/my-shops",
+     *     summary="Get authenticated user shops",
+     *     tags={"Shops"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="page",in="query",description="Page number",required=false,@OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="My shops",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data",type="array",@OA\Items(ref="#/components/schemas/ShopBasicResource")),
+     *             @OA\Property(
+     *                 property="links",
+     *                 type="object",
+     *                 @OA\Property(property="first", type="string", example="http://example.com/api/my-shops?page=1"),
+     *                 @OA\Property(property="last", type="string", example="http://example.com/api/my-shops?page=5"),
+     *                 @OA\Property(property="prev", type="string", example="http://example.com/api/my-shops?page=1"),
+     *                 @OA\Property(property="next", type="string", example="http://example.com/api/my-shops?page=3")
+     *             ),
+     *
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="from", type="integer", example=1),
+     *                 @OA\Property(property="last_page", type="integer", example=1),
+     *                 @OA\Property(property="path", type="string", example="http://example.com/api/my-shops"),
+     *                 @OA\Property(
+     *                     property="links",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="url", type="string", nullable=true, example="http://localhost/Ecommerce/public/api/my-shops?page=1"),
+     *                         @OA\Property(property="label", type="string", example="1"),
+     *                         @OA\Property(property="active", type="boolean", example=true)
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="per_page", type="integer", example=20),
+     *                 @OA\Property(property="to", type="integer", example=10),
+     *                 @OA\Property(property="total", type="integer", example=10)
+     *             ),
+     *             @OA\Property(property="status",type="string",example="Success"),
+     *             @OA\Property(property="message",type="string",example="My shops")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
+     */
+    public function myShops()
+    {
+        $shops = $this->shopService->myShops();
+
+        return ShopBasicResource::collection($shops)->additional([
+            'status' => 'Success',
+            'message' => 'My shops',
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/banned-shops",
+     *     summary="Get all banned shops",
+     *     description="Returns a paginated list of all banned (soft-deleted) shops",
+     *     tags={"Shops"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="page",in="query",description="Page number",required=false,@OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Banned shops retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data",type="array",@OA\Items(ref="#/components/schemas/ShopBasicResource")),
+     *             @OA\Property(
+     *                 property="links",
+     *                 type="object",
+     *                 @OA\Property(property="first", type="string", example="http://example.com/api/banned-shops?page=1"),
+     *                 @OA\Property(property="last",  type="string", example="http://example.com/api/banned-shops?page=5"),
+     *                 @OA\Property(property="prev",  type="string", nullable=true, example=null),
+     *                 @OA\Property(property="next",  type="string", nullable=true, example="http://example.com/api/banned-shops?page=2")
+     *             ),
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="from",         type="integer", example=1),
+     *                 @OA\Property(property="last_page",    type="integer", example=5),
+     *                 @OA\Property(property="path", type="string", example="http://example.com/api/banned-shops"),
+     *                 @OA\Property(
+     *                     property="links",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="url", type="string", nullable=true, example="http://localhost/Ecommerce/public/api/banned-shops?page=1"),
+     *                         @OA\Property(property="label", type="string", example="1"),
+     *                         @OA\Property(property="active", type="boolean", example=true)
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="per_page",type="integer", example=20),
+     *                 @OA\Property(property="to",type="integer", example=20),
+     *                 @OA\Property(property="total",type="integer", example=100)
+     *             ),
+     *             @OA\Property(property="status", type="string", example="Success"),
+     *             @OA\Property(property="message", type="string", example="Banned shops")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     ),
+     * )
+     */
+    public function bannedShops()
+    {
+        $shops = $this->shopService->bannedShops();
+
+        return ShopBasicResource::collection($shops)->additional([
+            'status' => 'Success',
+            'message' => 'Banned shops',
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/shops/search",
+     *     summary="Search shops by name",
+     *     description="Returns a paginated list of shops matching the search keyword",
+     *     tags={"Shops"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="nameKey",in="query",description="Keyword to search for in shop names",required=true,@OA\Schema(type="string", example="pizza")),
+     *     @OA\Parameter(name="page",in="query",description="Page number",required=false,@OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Search results retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data",type="array",@OA\Items(ref="#/components/schemas/ShopBasicResource")),
+     *             @OA\Property(
+     *                 property="links",
+     *                 type="object",
+     *                 @OA\Property(property="first", type="string", example="http://example.com/api/shops/search?page=1"),
+     *                 @OA\Property(property="last",  type="string", example="http://example.com/api/shops/search?page=5"),
+     *                 @OA\Property(property="prev",  type="string", nullable=true, example=null),
+     *                 @OA\Property(property="next",  type="string", nullable=true, example="http://example.com/api/shops/search?page=2")
+     *             ),
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="from",         type="integer", example=1),
+     *                 @OA\Property(property="last_page",    type="integer", example=5),
+     *                 @OA\Property(property="path", type="string", example="http://example.com/api/shops/search"),
+     *                 @OA\Property(
+     *                     property="links",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="url", type="string", nullable=true, example="http://localhost/Ecommerce/public/api/banned-shops?page=1"),
+     *                         @OA\Property(property="label", type="string", example="1"),
+     *                         @OA\Property(property="active", type="boolean", example=true)
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="per_page",type="integer", example=20),
+     *                 @OA\Property(property="to",type="integer", example=20),
+     *                 @OA\Property(property="total",type="integer", example=100)
+     *             ),
+     *             @OA\Property(property="status",  type="string", example="Success"),
+     *             @OA\Property(property="message", type="string", example="Search shops"),
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error - nameKey is required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The nameKey field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="nameKey",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The nameKey field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Forbidden")
+     *         )
+     *     )
+     * )
+     */
+    public function search(Request $request)
+    {
+        $request->validate(['nameKey' => 'required|string']);
+        $shop = $this->shopService->search($request);
+
+        return ShopBasicResource::collection($shop)->additional([
+            'status' => 'Success',
+            'message' => 'Search shop',
+        ]);
+    }
+
+    /**
+     * @OA\Get(
      *     path="/api/shops/show/{id}",
      *     tags={"Shops"},
      *     summary="Show a shop",
@@ -181,6 +413,7 @@ class ShopsController extends Controller
      *         response=201,
      *         description="Shop created",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Shop Created Successfully")
      *         )
@@ -261,6 +494,114 @@ class ShopsController extends Controller
         return response()->json([
             'status' => 'Success',
             'message' => 'Shop Updated Successfully',
+        ], 200);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/shops/{id}/ban",
+     *     summary="Ban a shop",
+     *     description="Soft deletes a shop by ID (ban it from the platform)",
+     *     tags={"Shops"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id",in="path",description="Shop ID to ban",required=true,@OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Shop banned successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status",  type="string", example="Success"),
+     *             @OA\Property(property="message", type="string", example="Shop banned successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Shop not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Shop] 1")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Forbidden")
+     *         )
+     *     )
+     * )
+    */
+    public function ban(int $id)
+    {
+        $this->shopService->ban($id);
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'Shop banned successfully.',
+        ], 200);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/shops/unban/{id}",
+     *     summary="Unban a shop",
+     *     description="Restores a soft-deleted (banned) shop by ID",
+     *     tags={"Shops"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id",in="path",description="Shop ID to unban",required=true,@OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Shop unbanned successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status",  type="string", example="Success"),
+     *             @OA\Property(property="message", type="string", example="Shop unbanned successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Shop not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Shop] 1")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Forbidden")
+     *         )
+     *     )
+     * )
+     */
+    public function unban(int $id)
+    {
+        $this->shopService->unban($id);
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'Shop unbanned successfully.',
         ], 200);
     }
 
