@@ -18,7 +18,6 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('price',8,2);
             $table->unique(['order_id','product_id']);
-            $table->timestamps();
         });
     }
 

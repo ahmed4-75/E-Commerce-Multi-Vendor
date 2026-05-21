@@ -6,6 +6,7 @@ use App\Http\Requests\CreateShopRequest;
 use App\Http\Requests\UpdateShopRequest;
 use App\Models\Shop;
 use App\Repositories\Contracts\ShopInterface;
+use Illuminate\Http\Request;
 
 class ShopService
 {
@@ -16,6 +17,21 @@ class ShopService
     public function index()
     {
         return $this->shopRepository->index();
+    }
+
+    public function myShops()
+    {
+        return $this->shopRepository->myShops();
+    }
+
+    public function bannedShops()
+    {
+        return $this->shopRepository->bannedShops();
+    }
+
+    public function search(Request $request)
+    {
+        return $this->shopRepository->search($request);
     }
 
     public function show(int $id)
@@ -34,11 +50,23 @@ class ShopService
         return $this->shopRepository->update($request, $shop);
     }
 
+    public function ban(int $id)
+    {
+        $shop = Shop::findOrFail($id);
+        return $this->shopRepository->ban($shop);
+    }
+
+    public function unban(int $id)
+    {
+        $shop = Shop::findOrFail($id);
+        return $this->shopRepository->unban($shop);
+    }
+
     public function delete(int $id)
     {
         $shop = Shop::findOrFail($id);
 
-        if ($shop->products()->exists()) {
+        if ($shop->products()->withTrashed()->exists()) {
             throw new \Exception(
                 'Can not delete the shop because it has related products. Move the products or delete them.'
             );

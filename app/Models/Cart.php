@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\Auth;
 
 class Cart extends Model
 {
@@ -14,9 +13,7 @@ class Cart extends Model
      *
      * @var list<string>
     */
-    protected $fillable = [
-        'user_id'
-    ];
+    protected $fillable = [ 'user_id' ];
 
     /**
      * Get the user that owns the cart.
@@ -31,12 +28,17 @@ class Cart extends Model
     */
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class,'products_carts','cart_id','product_id')->withPivot('quantity','price')->as('item');
+        return $this->belongsToMany(Product::class,'products_carts','cart_id','product_id')
+        ->withPivot('quantity','price')->as('item')
+        ;
     }
 
+    /**
+     * Get the items in the cart.
+     */
     public function items(string $lang)
     {
-        if ($this->products->isEmpty()) { return []; }
+        $this->loadMissing('products.translations');
         return $this->products->map(function ($product) use ($lang) {
             $translation = $product->translations->firstWhere('lang', $lang);
             return [
@@ -45,16 +47,18 @@ class Cart extends Model
                 'description' => $translation?->description,
                 'quantity' => $product->item?->quantity,
                 'price' => $product->item?->price,
-                'product_total' => ($product->item?->quantity ?? 0) * ($product->item?->price  ?? 0)
+                'total_price' => ($product->item?->quantity ?? 0) * ($product->item?->price  ?? 0)
             ];
         });
     }
 
+    /**
+     * Get the total price of the cart.
+    */
     public function getCartTotalAttribute()
     {
         return $this->products->sum(function ($product) {
             return $product->item->quantity * $product->item->price;
         });
     }
-    
 }

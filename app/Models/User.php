@@ -64,11 +64,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the cart associated with the user.
+     * Get the carts associated with the user.
     */
-    public function carts(): HasOne
+    public function carts(): HasMany
     {
-        return $this->hasOne(Cart::class,'user_id');
+        return $this->hasMany(Cart::class,'user_id');
     }
 
     /**

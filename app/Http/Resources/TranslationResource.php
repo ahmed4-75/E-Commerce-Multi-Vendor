@@ -18,12 +18,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="lang", type="string", example="ar"),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
- *     @OA\Property(property="type", type="string", example="category or product"),
+ *     @OA\Property(property="type", type="string", enum={"category","product"}, example="product"),
  *     @OA\Property(
  *         property="translationable",
  *         oneOf={@OA\Schema(ref="#/components/schemas/CategoryResource"),@OA\Schema(ref="#/components/schemas/ProductResource")},
  *         nullable=true,description="Polymorphic relation (Category or Product), returned only if loaded"
- *     ),
+ *     )
  * )
 */
 class TranslationResource extends JsonResource
@@ -44,7 +44,7 @@ class TranslationResource extends JsonResource
             'updated_at' => $this->updated_at,
             'type' => $this->type,
 
-            'translationable' => $this->whenLoaded('translationable', 
+            'translationable' => $this->whenLoaded('translationable',
                 function () {
                     return match (true) {
                         $this->translationable instanceof Category => new CategoryResource($this->translationable),
