@@ -34,7 +34,7 @@ class OrderRepository implements OrderInterface
                 'user_id' => Auth::id(),
                 'status' => 'pending',
                 'lang' => $request->lang,
-                'amount' => $cart->cart_total,
+                'amount' => $cart->cart_total * 100, // Convert to cents
                 'currency' => $request->currency,
                 'payment_gateway' => $request->payment_gateway,
             ]);
