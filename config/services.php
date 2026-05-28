@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'paymob' => [
+        'base_url' => env('PAYMOB_BASE_URL'),
+        'hmac_key' => env('PAYMOB_HMAC_KEY'),
+        'api_key' => env('PAYMOB_API_KEY'),
+        'security_key' => env('PAYMOB_SECURITY_KEY'),
+        'public_key' => env('PAYMOB_PUBLIC_KEY'),
+        'integrations' =>  ['OnlineCard' => 5683778, 'MobileWallet' => 5683914, 'PayPal' => 5683860]
+    ],
+
+    'tap' => [
+        'base_url' => env('TAP_BASE_URL'),
+        'api_key' => env('TAP_API_KEY'),
+        'public_key' => env('TAP_PUBLIC_KEY'),
+    ],
 ];

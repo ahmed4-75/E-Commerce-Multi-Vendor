@@ -2317,6 +2317,172 @@
                 ]
             }
         },
+        "/api/payment/process/{id}": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Create Tap payment",
+                "description": "Generate Tap payment URL and redirect user to payment page.",
+                "operationId": "d4621dd3ea1049ef2ebfe5327d5285b0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Order id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "gateway",
+                        "in": "query",
+                        "description": "Payment gateway",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "paymob",
+                            "enum": [
+                                "tap",
+                                "paymob"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Paymob Payment type",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "OnlineCard",
+                            "enum": [
+                                "OnlineCard",
+                                "MobileWallet",
+                                "PayPal"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "phone_number",
+                                    "email",
+                                    "amount",
+                                    "currency"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Ahmed Morgan"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+201012345678"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ahmed@example.com"
+                                    },
+                                    "amount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 150.5
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "EGP"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Order Payment",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment link generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment link generated successfully"
+                                        },
+                                        "url": {
+                                            "type": "string",
+                                            "example": "https://checkout.tap.company/checkout/123456"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Payment failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid payment data"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/products/{id}": {
             "get": {
                 "tags": [
@@ -5200,30 +5366,6 @@
                 ]
             }
         },
-        "/api/test": {
-            "get": {
-                "summary": "Get test",
-                "operationId": "7a09caa81b6dfd4c5087d06d7689eaa8",
-                "responses": {
-                    "200": {
-                        "description": "test Swagger",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Successful operation Test"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/Translations/category/{id}": {
             "get": {
                 "tags": [
@@ -6308,6 +6450,10 @@
         {
             "name": "Orders",
             "description": "Orders"
+        },
+        {
+            "name": "Payments",
+            "description": "Payments"
         },
         {
             "name": "Products",

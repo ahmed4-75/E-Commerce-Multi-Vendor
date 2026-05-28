@@ -8,10 +8,10 @@ use App\Http\Controllers\CartsController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShopsController;
-use App\Http\Controllers\TestController;
 use App\Http\Controllers\TranslationsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,8 +19,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-
-Route::get('/test',[TestController::class, 'test']);
 
 Route::post('/register',RegisterController::class);
 Route::post('/verify-email',VerifyEmailController::class);
@@ -84,4 +82,8 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/orders/create',[OrdersController::class, 'store']);
     Route::put('/orders/update/{id}',[OrdersController::class, 'update']);
     Route::delete('/orders/delete/{id}',[OrdersController::class, 'delete']);
+
+    Route::post('/payment/process/{id}', [PaymentsController::class, 'paymentProcess']);
+    Route::match(['GET','POST'],'/payment/callback', [PaymentsController::class, 'callback'])->name('payment.callback');
 });
+

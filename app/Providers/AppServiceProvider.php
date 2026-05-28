@@ -13,8 +13,11 @@ use App\Repositories\ShopRepository;
 use App\Repositories\CommentRepository;
 use App\Repositories\Contracts\CartInterface;
 use App\Repositories\Contracts\OrderInterface;
+use App\Repositories\Contracts\PaymentGatewayInterface;
 use App\Repositories\Contracts\TranslationInterface;
 use App\Repositories\OrderRepository;
+use App\Repositories\PaymobPaymentRepository;
+use App\Repositories\TapPaymentRepository;
 use App\Repositories\TranslationRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -58,7 +61,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             TranslationInterface::class,
             TranslationRepository::class
-            );
+        );
+
+        $this->app->bind(
+            PaymentGatewayInterface::class,
+            PaymobPaymentRepository::class,
+            TapPaymentRepository::class
+        );
+        // TapPaymentService::class,
     }
 
     /**
