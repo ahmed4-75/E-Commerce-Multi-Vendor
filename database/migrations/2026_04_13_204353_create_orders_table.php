@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('currency')->default('EGP');
             $table->string('status')->default('pending');
             $table->text('note')->nullable();
-            $table->string('payment_gateway');
+            $table->string('payment_gateway')->nullable();
             $table->string('gateway_order_id')->nullable();
             $table->string('transaction_id')->nullable();
             $table->timestamps();

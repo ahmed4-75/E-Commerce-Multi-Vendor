@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LanguageRequest;
 use App\Http\Requests\AddQuantityCartRequest;
 use App\Http\Resources\CartResource;
+use App\Models\Cart;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class CartsController extends Controller
 {
@@ -27,6 +29,7 @@ class CartsController extends Controller
      *         response=200,
      *         description="Carts retrieved successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="carts",type="array",@OA\Items(ref="#/components/schemas/CartResource")),
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Carts retrieved successfully.")
@@ -47,7 +50,7 @@ class CartsController extends Controller
             'carts' =>$carts,
             'status' => 'Success',
             'message' => 'Carts retrieved successfully.',
-        ]);
+        ], 200);
     }
 
     /**
@@ -62,6 +65,7 @@ class CartsController extends Controller
      *         response=201,
      *         description="Cart created successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Cart created successfully.")
      *         )
@@ -70,11 +74,23 @@ class CartsController extends Controller
      *     @OA\Response(
      *         response=401,
      *         description="Unauthenticated"
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
      *     )
      * )
     */
     public function store()
     {
+        Gate::authorize('store', Cart::class);
+
         $this->cartService->store();
 
         return response()->json([
@@ -96,9 +112,8 @@ class CartsController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"id","quantity"},
-     *
-     *             @OA\Property(property="id",type="integer",example=5,description="Product ID"),
+     *             required={"product_id","quantity"},
+     *             @OA\Property(property="product_id",type="integer",example=5,description="Product ID"),
      *             @OA\Property(property="quantity",type="integer",example=2,description="Quantity of product")
      *         )
      *     ),
@@ -107,6 +122,7 @@ class CartsController extends Controller
      *         response=201,
      *         description="Product added to cart successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Product added to cart successfully.")
      *         )
@@ -114,13 +130,7 @@ class CartsController extends Controller
      *
      *     @OA\Response(
      *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors",type="object",
-     *                 @OA\Property(property="product",type="array",@OA\Items(type="string", example="Product already in cart."))
-     *             )
-     *         )
+     *         description="Validation error"
      *     ),
      *
      *     @OA\Response(
@@ -129,13 +139,30 @@ class CartsController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *           type="object",
+     *            @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
-     *         description="Cart or Product not found"
+     *         description="Cart or Product not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Cart or Product not found.")
+     *         )
      *     )
      * )
     */
     public function addToCart(AddQuantityCartRequest $request, int $id)
     {
+        Gate::authorize('addToCart', Cart::class);
+
         $this->cartService->addToCart($request, $id);
 
         return response()->json([
@@ -159,7 +186,7 @@ class CartsController extends Controller
      *         response=200,
      *         description="Cart retrieved successfully",
      *         @OA\JsonContent(
-     *
+     *             type="object",
      *             @OA\Property(property="cart",ref="#/components/schemas/CartResource"),
      *             @OA\Property(property="missing_translation",type="array",
      *                 @OA\Items(
@@ -173,8 +200,13 @@ class CartsController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *         response=400,
-     *         description="Cart is empty"
+     *         response=204,
+     *         description="Cart is empty",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="No Content"),
+     *             @OA\Property(property="message",type="string",example="Cart is empty.")
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -183,8 +215,23 @@ class CartsController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
-     *         description="Cart not found"
+     *         description="Cart not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Cart not found.")
+     *         ),
      *     ),
      *
      *     @OA\Response(
@@ -202,7 +249,7 @@ class CartsController extends Controller
             'cart' => new CartResource($data['cart'], $lang),
             'missing_translation' => $data['missing_translation'],
             'missing_count' => $data['missing_count']
-        ]);
+        ], 200);
     }
 
     /**
@@ -215,13 +262,17 @@ class CartsController extends Controller
      *
      *     @OA\Parameter(name="id",in="path",required=true,description="Cart ID",@OA\Schema(type="integer", example=1)),
      *
-     *     @OA\RequestBody(required=true,
-     *         @OA\JsonContent(required={"product_id"},@OA\Property(property="product_id",type="integer",example=5,description="Product ID"))),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(required={"product_id"},
+     *             @OA\Property(property="product_id",type="integer",example=5,description="Product ID"))
+     *     ),
      *
      *     @OA\Response(
      *         response=201,
      *         description="Product removed from cart successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status",type="string",example="Success"),
      *             @OA\Property(property="message",type="string",example="Product removed from cart successfully.")
      *         )
@@ -233,8 +284,23 @@ class CartsController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
-     *         description="Cart or Product not found"
+     *         description="Cart or Product not found",
+     *        @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Cart or Product not found.")
+     *         ),
      *     ),
      *
      *     @OA\Response(
@@ -245,6 +311,8 @@ class CartsController extends Controller
     */
     public function removeFromCart(Request $request, int $id)
     {
+        Gate::authorize('removeFromCart', Cart::class);
+
         $this->cartService->removeFromCart($request, $id);
 
         return response()->json([
@@ -267,6 +335,7 @@ class CartsController extends Controller
      *         response=200,
      *         description="Cart deleted successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Cart deleted successfully.")
      *         )
@@ -274,17 +343,16 @@ class CartsController extends Controller
      *
      *     @OA\Response(
      *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
+     *         description="Unauthenticated"
      *     ),
      *
      *     @OA\Response(
      *         response=404,
      *         description="Cart not found",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Cart].")
+     *            type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Cart not found.")
      *         )
      *     )
      * )

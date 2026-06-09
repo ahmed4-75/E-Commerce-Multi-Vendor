@@ -52,7 +52,7 @@ class CommentsController extends Controller
         return response()->json([
             'status' => 'Success',
             'message' => 'Comment created successfully'
-            ], 201);
+        ], 201);
     }
 
     /**

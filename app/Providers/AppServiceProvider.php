@@ -3,21 +3,23 @@
 namespace App\Providers;
 
 use App\Repositories\CartRepository;
+use App\Repositories\Contracts\CartInterface;
 use App\Repositories\CategoryRepository;
 use App\Repositories\Contracts\CategoryInterface;
-use App\Repositories\Contracts\CommentInterface;
-use App\Repositories\Contracts\ProductInterface;
-use App\Repositories\Contracts\ShopInterface;
-use App\Repositories\ProductRepository;
-use App\Repositories\ShopRepository;
 use App\Repositories\CommentRepository;
-use App\Repositories\Contracts\CartInterface;
-use App\Repositories\Contracts\OrderInterface;
-use App\Repositories\Contracts\PaymentGatewayInterface;
-use App\Repositories\Contracts\TranslationInterface;
+use App\Repositories\Contracts\CommentInterface;
 use App\Repositories\OrderRepository;
+use App\Repositories\Contracts\OrderInterface;
 use App\Repositories\PaymentGatewayRepository;
+use App\Repositories\Contracts\PaymentGatewayInterface;
+use App\Repositories\ProductRepository;
+use App\Repositories\Contracts\ProductInterface;
+use App\Repositories\ShopRepository;
+use App\Repositories\Contracts\ShopInterface;
 use App\Repositories\TranslationRepository;
+use App\Repositories\Contracts\TranslationInterface;
+use App\Repositories\UserRepository;
+use App\Repositories\Contracts\UserInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -65,6 +67,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             PaymentGatewayInterface::class,
             PaymentGatewayRepository::class,
+        );
+
+        $this->app->bind(
+            UserInterface::class,
+            UserRepository::class
         );
     }
 

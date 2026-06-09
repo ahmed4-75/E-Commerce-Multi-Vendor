@@ -23,7 +23,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="carts", type="array", description="Loaded only if relation carts is loaded", @OA\Items(ref="#/components/schemas/CartResource")),
  *     @OA\Property(property="orders", type="array", description="Loaded only if relation orders is loaded", @OA\Items(ref="#/components/schemas/OrderResource")),
  *     @OA\Property(property="comments", type="array", description="Loaded only if relation comments is loaded", @OA\Items(ref="#/components/schemas/CommentResource")),
- *     @OA\Property(property="shops", type="array", description="Loaded only if relation shops is loaded", @OA\Items(ref="#/components/schemas/ShopResource"))
+ *     @OA\Property(property="shops", type="array", description="Loaded only if relation shops is loaded", @OA\Items(ref="#/components/schemas/ShopResource")),
+ *     @OA\Property(property="roles", type="array", description="Loaded only if relation roles is loaded", @OA\Items(ref="#/components/schemas/RoleResource"))
  * )
 */
 class UserResource extends JsonResource
@@ -50,7 +51,8 @@ class UserResource extends JsonResource
             'carts' => CartResource::collection($this->whenLoaded('carts')),
             'orders' => OrderResource::collection($this->whenLoaded('orders')),
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
-            'shops' => ShopResource::collection($this->whenLoaded('shops'))
+            'shops' => ShopResource::collection($this->whenLoaded('shops')),
+            'roles' => RoleResource::collection($this->whenLoaded('roles'))
         ];
     }
 }

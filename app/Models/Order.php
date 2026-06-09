@@ -44,8 +44,7 @@ class Order extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class,'ordered_products','order_id','product_id')
-        ->withPivot(['quantity','price'])->as('item')
-        ;
+        ->withPivot(['quantity','price'])->as('item');
     }
 
         /**
@@ -63,7 +62,7 @@ class Order extends Model
                 'description' => $translation?->description,
                 'quantity' => $product->item?->quantity,
                 'price' => $product->item?->price,
-                'total_price' => ($product->item?->quantity ?? 0) * ($product->item?->price  ?? 0)
+                'total_price' => round(($product->item?->quantity ?? 0) * ($product->item?->price  ?? 0),2)
             ];
         });
     }
@@ -73,8 +72,8 @@ class Order extends Model
     */
     public function getCartTotalAttribute()
     {
-        return $this->products->sum(function ($product) {
+        return round($this->products->sum(function ($product) {
             return $product->item->quantity * $product->item->price;
-        });
+        }),2);
     }
 }

@@ -11,8 +11,10 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ShopsController;
 use App\Http\Controllers\TranslationsController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,9 +49,10 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::put('/shops/update/{id}',[ShopsController::class, 'update']);
     Route::delete('/shops/ban/{id}',[ShopsController::class, 'ban']);
     Route::post('/shops/unban/{id}',[ShopsController::class, 'unban']);
+    Route::delete('/shops/delete-myShop/{id}',[ShopsController::class, 'deleteMine']);
     Route::delete('/shops/delete/{id}',[ShopsController::class, 'delete']);
 
-    Route::get('/products/{id}',[ProductsController::class, 'index']);
+    Route::get('/products/category/{id}',[ProductsController::class, 'index']);
     Route::get('/products/shop/{id}',[ProductsController::class, 'shopProducts']);
     Route::get('/products/banned',[ProductsController::class, 'bannedProducts']);
     Route::get('/products/search/{id}',[ProductsController::class, 'search']);
@@ -58,12 +61,15 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/products/update/{id}',[ProductsController::class, 'update']);
     Route::delete('/products/ban/{id}',[ProductsController::class, 'ban']);
     Route::post('/products/unban/{id}',[ProductsController::class, 'unban']);
+    Route::delete('/products/delete-myProduct/{id}',[ProductsController::class, 'deleteMine']);
     Route::delete('/products/delete/{id}',[ProductsController::class, 'delete']);
 
     Route::get('/Translations/category/{id}',[TranslationsController::class, 'categoryLangs']);
     Route::post('/Translations/category/add/{id}',[TranslationsController::class, 'addToCategory']);
+    Route::delete('/Translations/category/remove/{id}',[TranslationsController::class, 'removeFromCategory']);
     Route::get('/Translations/product/{id}',[TranslationsController::class, 'productLangs']);
     Route::post('/Translations/product/add/{id}',[TranslationsController::class, 'addToProduct']);
+    Route::delete('/Translations/product/remove/{id}',[TranslationsController::class, 'removeFromProduct']);
 
     Route::post('/comments/create',[CommentsController::class, 'store']);
     Route::put('/comments/update/{id}',[CommentsController::class, 'update']);
@@ -78,12 +84,24 @@ Route::middleware(['auth:sanctum'])->group(function(){
 
     Route::get('/orders/user',[OrdersController::class, 'index']);
     Route::get('/orders/all',[OrdersController::class, 'allOrders']);
+    Route::get('/orders/product/{id}',[OrdersController::class, 'ordersProduct']);
     Route::get('/order/show/{id}',[OrdersController::class, 'show']);
     Route::post('/orders/create',[OrdersController::class, 'store']);
     Route::put('/orders/update/{id}',[OrdersController::class, 'update']);
+    Route::put('/orders/shipping/{id}',[OrdersController::class, 'shipping']);
+    Route::put('/orders/delivered/{id}',[OrdersController::class, 'delivered']);
+    Route::put('/orders/delete-ready/{id}',[OrdersController::class, 'deleteReady']);
     Route::delete('/orders/delete/{id}',[OrdersController::class, 'delete']);
 
     Route::post('/payment/process/{id}', [PaymentsController::class, 'paymentProcess']);
-    Route::match(['GET','POST'],'/payment/callback', [PaymentsController::class, 'callback'])->name('payment.callback');
+
+    Route::get('/users',[UsersController::class,'index']);
+    Route::put('/users/change-role/{id}',[UsersController::class,'changeRole']);
+    Route::delete('/users/ban/{id}',[UsersController::class,'ban']);
+    Route::post('/users/activate/{id}',[UsersController::class,'activate']);
+    Route::delete('/users/delete/{id}',[UsersController::class,'destroy']);
+
+    Route::apiResource('roles',RolesController::class);
 });
+Route::match(['GET','POST'],'/payment/callback', [PaymentsController::class, 'callback'])->name('payment.callback');
 

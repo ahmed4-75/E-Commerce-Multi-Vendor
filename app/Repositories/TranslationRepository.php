@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Enums\LanguagesEnum;
 use App\Http\Requests\AddTranslationRequest;
+use App\Http\Requests\RemoveTranslationRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Repositories\Contracts\TranslationInterface;
@@ -35,6 +36,11 @@ class TranslationRepository implements TranslationInterface
         return true;
     }
 
+    public function removeFromCategory(Category $category, RemoveTranslationRequest $request)
+    {
+        $category->translations()->whereKey($request->translation_id)->where('lang', $request->lang)->firstOrFail()->delete();
+    }
+
     public function productLangs(Product $product)
     {
         $availableLangs = $product->translations()->pluck('lang')->toArray();
@@ -58,5 +64,10 @@ class TranslationRepository implements TranslationInterface
             'lang' => $request->lang
         ]);
         return true;
+    }
+
+    public function removeFromProduct(Product $product, RemoveTranslationRequest $request)
+    {
+        $product->translations()->whereKey($request->translation_id)->where('lang', $request->lang)->firstOrFail()->delete();
     }
 }

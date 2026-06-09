@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Repositories\Contracts\PaymentGatewayInterface;
 use libphonenumber\PhoneNumberUtil;
 use \Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 // use Illuminate\Support\Facades\Storage;
 
 class TapPaymentService extends BasePaymentService
@@ -29,7 +30,7 @@ class TapPaymentService extends BasePaymentService
 
     public function sendPayment(int $id, PaymentSendRequest $request): array
     {
-        $order = Order::query()->whereKey($id)->firstOrFail();
+        $order = Order::query()->whereKey($id)->where('user_id', Auth::id())->firstOrFail();
         $transaction = 'txn_'.$id.'_'. time();
         if ($order->status === 'paid' or $order->transaction_id == $transaction) {
             return [
@@ -46,7 +47,7 @@ class TapPaymentService extends BasePaymentService
             'POST',
             '/v2/charges/',
             [
-                'amount' => $request->amount,
+                'amount' => $order->amount,
                 'currency' => $request->currency,
                 // 'reference' => ['transaction'=> $transaction,'order'=>335],
                 'reference' => ['transaction'=> $transaction,'order'=>$order->id],
@@ -66,7 +67,7 @@ class TapPaymentService extends BasePaymentService
 
         if ($response->successful()) {
             // Tap order id
-            $tapOrderId = $response->json('tap_id');
+            $tapOrderId = $response->json('id');
 
             $this->paymentGateway->paymentStart($order, 'tap', $tapOrderId);
 

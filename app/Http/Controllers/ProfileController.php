@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
@@ -40,13 +39,11 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        return response()->json(
-            [
-                'status' => 'Success',
-                'message' => 'You are in Your Profile',
-                'data' => new UserResource(Auth::user()),
-            ],200
-        );
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'You are in Your Profile',
+            'data' => new UserResource(Auth::user()),
+        ],200);
     }
 
     /**
@@ -204,11 +201,9 @@ class ProfileController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $user->tokens()->delete();
-        return response()->json(
-            [
-                'status' => 'Success',
-                'message' => 'Logged out',
-            ],200
-        );
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'Logged out',
+        ],200);
     }
 }

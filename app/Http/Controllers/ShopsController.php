@@ -6,8 +6,10 @@ use App\Http\Requests\CreateShopRequest;
 use App\Http\Requests\UpdateShopRequest;
 use App\Http\Resources\ShopBasicResource;
 use App\Http\Resources\ShopResource;
+use App\Models\Shop;
 use App\Services\ShopService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ShopsController extends Controller
 {
@@ -62,11 +64,23 @@ class ShopsController extends Controller
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="All shops")
      *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *           type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
      *     )
      * )
     */
     public function index()
     {
+        Gate::authorize('index', Shop::class);
+
         $shops = $this->shopService->index();
 
         return ShopBasicResource::collection($shops)->additional([
@@ -190,6 +204,7 @@ class ShopsController extends Controller
      *         response=200,
      *         description="Banned shops retrieved successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data",type="array",@OA\Items(ref="#/components/schemas/ShopBasicResource")),
      *             @OA\Property(
      *                 property="links",
@@ -227,15 +242,24 @@ class ShopsController extends Controller
      *
      *     @OA\Response(
      *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
+     *         description="Unauthenticated"
      *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     )
      * )
      */
     public function bannedShops()
     {
+        Gate::authorize('bannedShops', Shop::class);
+
         $shops = $this->shopService->bannedShops();
 
         return ShopBasicResource::collection($shops)->additional([
@@ -259,6 +283,7 @@ class ShopsController extends Controller
      *         response=200,
      *         description="Search results retrieved successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data",type="array",@OA\Items(ref="#/components/schemas/ShopBasicResource")),
      *             @OA\Property(
      *                 property="links",
@@ -296,36 +321,13 @@ class ShopsController extends Controller
      *
      *     @OA\Response(
      *         response=422,
-     *         description="Validation error - nameKey is required",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The nameKey field is required."),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 @OA\Property(
-     *                     property="nameKey",
-     *                     type="array",
-     *                     @OA\Items(type="string", example="The nameKey field is required.")
-     *                 )
-     *             )
-     *         )
+     *         description="Validation error - nameKey is required"
      *     ),
      *
      *     @OA\Response(
      *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
+     *         description="Unauthenticated"
      *     ),
-     *
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Forbidden")
-     *         )
-     *     )
      * )
      */
     public function search(Request $request)
@@ -341,17 +343,19 @@ class ShopsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/shops/show/{id}",
+     *     path="/api/shop/show/{id}",
      *     tags={"Shops"},
      *     summary="Show a shop",
      *     description="Returns one shop with full information",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="shop id", @OA\Schema(type="integer", example=1)),
      *
      *     @OA\Response(
      *         response=200,
      *         description="Show shop",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data", type="object", ref="#/components/schemas/ShopResource"),
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Show shop")
@@ -362,6 +366,7 @@ class ShopsController extends Controller
      *         response=404,
      *         description="Shop not found",
      *         @OA\JsonContent(
+     *            type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Shop not found")
      *         )
@@ -420,6 +425,16 @@ class ShopsController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=422,
      *         description="Validation error"
      *     )
@@ -427,6 +442,8 @@ class ShopsController extends Controller
     */
     public function store(CreateShopRequest $request)
     {
+        Gate::authorize('store', Shop::class);
+
         $this->shopService->store($request);
 
         return response()->json([
@@ -437,7 +454,7 @@ class ShopsController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/shop/update/{id}",
+     *     path="/api/shops/update/{id}",
      *     tags={"Shops"},
      *     summary="Update shop",
      *     description="Update an existing shop",
@@ -470,14 +487,30 @@ class ShopsController extends Controller
      *         response=200,
      *         description="Shop updated",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Shop Updated Successfully")
      *         )
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
-     *         description="Shop not found"
+     *         description="Shop not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Shop not found.")
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -488,6 +521,7 @@ class ShopsController extends Controller
     */
     public function update(UpdateShopRequest $request, int $id)
     {
+        Gate::authorize('update', Shop::class);
 
         $this->shopService->update($request, $id);
 
@@ -499,7 +533,7 @@ class ShopsController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/shops/{id}/ban",
+     *     path="/api/shops/ban/{id}",
      *     summary="Ban a shop",
      *     description="Soft deletes a shop by ID (ban it from the platform)",
      *     tags={"Shops"},
@@ -511,8 +545,24 @@ class ShopsController extends Controller
      *         response=200,
      *         description="Shop banned successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status",  type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Shop banned successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *            type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -520,29 +570,17 @@ class ShopsController extends Controller
      *         response=404,
      *         description="Shop not found",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Shop] 1")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Forbidden")
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Shop not found.")
      *         )
      *     )
      * )
     */
     public function ban(int $id)
     {
+        Gate::authorize('ban', Shop::class);
+
         $this->shopService->ban($id);
 
         return response()->json([
@@ -565,8 +603,24 @@ class ShopsController extends Controller
      *         response=200,
      *         description="Shop unbanned successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status",  type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Shop unbanned successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *            type="object",
+     *            @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -574,35 +628,80 @@ class ShopsController extends Controller
      *         response=404,
      *         description="Shop not found",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Shop] 1")
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Shop not found.")
      *         )
      *     ),
-     *
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Forbidden")
-     *         )
-     *     )
      * )
      */
     public function unban(int $id)
     {
+        Gate::authorize('unban', Shop::class);
+
         $this->shopService->unban($id);
 
         return response()->json([
             'status' => 'Success',
             'message' => 'Shop unbanned successfully.',
         ], 200);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/shops/delete-myShop/{id}",
+     *     tags={"Shops"},
+     *     summary="Delete my shop",
+     *     description="Delete a shop. Fails if there are related products or not user Shop.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="shop id", @OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Shop deleted",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Success"),
+     *             @OA\Property(property="message", type="string", example="Shop deleted successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Shop not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Shop not found")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=409,
+     *         description="Delete shop fail",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Can not delete the shop because it has related products. Move the products or delete them.")
+     *         )
+     *     )
+     * )
+    */
+    public function deleteMine(int $id)
+    {
+        try {
+            $this->shopService->deleteMine($id);
+
+            return response()->json([
+                'status' => 'Success',
+                'message' => 'Shop deleted successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $e->getMessage(),
+            ], 409);
+        }
     }
 
     /**
@@ -618,6 +717,7 @@ class ShopsController extends Controller
      *         response=200,
      *         description="Shop deleted",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Shop deleted successfully")
      *         )
@@ -625,13 +725,19 @@ class ShopsController extends Controller
      *
      *     @OA\Response(
      *         response=404,
-     *         description="Shop not found"
+     *         description="Shop not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Shop not found")
+     *         )
      *     ),
      *
      *     @OA\Response(
      *         response=409,
      *         description="Delete shop fail",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Can not delete the shop because it has related products. Move the products or delete them.")
      *         )
@@ -640,6 +746,8 @@ class ShopsController extends Controller
     */
     public function delete(int $id)
     {
+        Gate::authorize('delete', Shop::class);
+
         try {
             $this->shopService->delete($id);
 

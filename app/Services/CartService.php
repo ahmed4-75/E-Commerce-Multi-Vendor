@@ -29,8 +29,8 @@ class CartService
     public function addToCart(AddQuantityCartRequest $request, int $id)
     {
         $cart = Cart::whereKey($id)->where('user_id', Auth::id())->firstOrFail();
-        $product = Product::findOrFail($request->id);
-        if($cart->products()->whereKey($request->id)->exists()) {
+        $product = Product::findOrFail($request->product_id);
+        if($cart->products()->whereKey($request->product_id)->exists()) {
             throw ValidationException::withMessages([
                 'product' => 'Product already in cart.'
             ]);
@@ -42,7 +42,7 @@ class CartService
     {
         $cart = Cart::whereKey($id)->where('user_id', Auth::id())->firstOrFail();
         if($cart->products()->count() === 0) {
-            throw new \Exception("Cart is empty.", 400);
+            throw new \Exception("Cart is empty.", 204);
         }
         return $this->cartRepository->show($lang, $cart);
     }

@@ -22,10 +22,10 @@ class AddQuantityCartRequest extends FormRequest
      */
     public function rules(): array
     {
-        $productId = (int) $this->route('id');
+        $productId = (int) $this->input('product_id');
         $product = Product::findOrFail($productId);
         return [
-            'id' => 'required|integer|exists:products,id',
+            'product_id' => 'required|integer|exists:products,id',
             'quantity' => 'required|integer|min:0|max:'.$product->quantity,
         ];
     }

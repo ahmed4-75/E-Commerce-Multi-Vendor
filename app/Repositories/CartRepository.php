@@ -19,9 +19,7 @@ class CartRepository implements CartInterface
 
     public function store()
     {
-        Cart::create([
-            'user_id' => Auth::id(),
-        ]);
+        Cart::create([ 'user_id' => Auth::id() ]);
     }
 
     public function addToCart(AddQuantityCartRequest $request, Product $product, Cart $cart)
@@ -40,7 +38,10 @@ class CartRepository implements CartInterface
 
     public function show(string $lang, Cart $cart)
     {
-        $cart->load('products.translations');
+        $cart->load([
+            'products' => fn ($query) => $query->withTrashed(),
+            'products.translations'
+        ]);
 
         $allProducts = $cart->products;
 
@@ -68,7 +69,7 @@ class CartRepository implements CartInterface
 
     public function removeFromCart(Cart $cart, Product $product)
     {
-        $productCart = $cart->products()->whereKey($product->id)->firstOrFail()->pivot;
+        $productCart = $cart->products()->withTrashed()->where('products.id', $product->id)->firstOrFail()->item;
 
         DB::transaction(function () use ($cart, $productCart, $product) {
             // Update product quantity
@@ -79,7 +80,7 @@ class CartRepository implements CartInterface
 
     public function delete(Cart $cart)
     {
-        $products = $cart->products;
+        $products = $cart->products()->withTrashed()->get();
 
         DB::transaction(function () use ($products, $cart) {
             foreach ($products as $product) {

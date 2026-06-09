@@ -8,6 +8,8 @@ use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\UpdateCategoryRequest;
+use App\Models\Category;
+use Illuminate\Support\Facades\Gate;
 
 class CategoriesController extends Controller
 {
@@ -29,6 +31,7 @@ class CategoriesController extends Controller
      *         response=200,
      *         description="All categories",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data",type="array",@OA\Items(ref="#/components/schemas/CategoryResource")),
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="All categories")
@@ -39,6 +42,7 @@ class CategoriesController extends Controller
      *         response=404,
      *         description="categories does not exist",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="The categories for this language does not exist")
      *         )
@@ -96,8 +100,19 @@ class CategoriesController extends Controller
      *         response=200,
      *         description="Create category",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Category Created Successfully, Available only in en ,You must add the other available languages"),
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -109,6 +124,8 @@ class CategoriesController extends Controller
     */
     public function store(CreateCategoryRequest $request)
     {
+        Gate::authorize('store', Category::class);
+
         $this->categoryService->store($request);
 
         return response()->json
@@ -133,6 +150,7 @@ class CategoriesController extends Controller
      *         response=200,
      *         description="show a Category",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data", type="object", ref="#/components/schemas/CategoryResource"),
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Show Category")
@@ -140,9 +158,20 @@ class CategoriesController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
      *         description="category does not exist",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="The category does not exist or for this language")
      *         )
@@ -156,6 +185,8 @@ class CategoriesController extends Controller
     */
     public function show(LanguageRequest $request ,int $id)
     {
+        Gate::authorize('show', Category::class);
+
         $lang = $request->validated('lang') ?? Auth::user()?->lang;
 
         $category = $this->categoryService->show($lang ,$id);
@@ -195,8 +226,19 @@ class CategoriesController extends Controller
      *         response=200,
      *         description="update a Category",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Category Updated Successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -204,6 +246,7 @@ class CategoriesController extends Controller
      *         response=404,
      *         description="Category not found",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Category not found")
      *         )
@@ -217,6 +260,8 @@ class CategoriesController extends Controller
     */
     public function update(UpdateCategoryRequest $request ,int $id)
     {
+        Gate::authorize('update', Category::class);
+
         $this->categoryService->update($request ,$id);
 
         return response()->json
@@ -239,8 +284,19 @@ class CategoriesController extends Controller
      *         response=200,
      *         description="Delete Category Success",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Category deleted successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -248,6 +304,7 @@ class CategoriesController extends Controller
      *         response=404,
      *         description="Category not found",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Category does not exist")
      *         )
@@ -257,6 +314,7 @@ class CategoriesController extends Controller
      *         response=409,
      *         description="Delete Category fail",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Can not delete the category because it has related products. Move the products or Delete Them.")
      *         )
@@ -265,6 +323,8 @@ class CategoriesController extends Controller
     */
     public function delete(int $id)
     {
+        Gate::authorize('delete', Category::class);
+
         try {
             $this->categoryService->delete($id);
 

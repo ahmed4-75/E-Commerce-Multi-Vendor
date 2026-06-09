@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use \Illuminate\Http\Response;
 use App\Models\Order;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class PaymobPaymentService extends BasePaymentService
 {
@@ -50,7 +51,7 @@ class PaymobPaymentService extends BasePaymentService
 
     public function sendPayment(int $id, PaymentSendRequest $request, string $type): array
     {
-        $order = Order::query()->whereKey($id)->firstOrFail();
+        $order = Order::query()->whereKey($id)->where('user_id', Auth::id())->firstOrFail();
         if ($order->status === 'paid' or $order->transaction_id != null) {
             return [
                 'success' => false,
@@ -65,12 +66,10 @@ class PaymobPaymentService extends BasePaymentService
             'POST',
             '/api/ecommerce/payment-links',
             [
-                'amount_cents' => $request->amount * 100,
+                'amount_cents' => $order->amount * 100,
                 'is_live' => false,
                 'expires_at' => now()->addHours(10)->toIso8601String(),
                 'reference_id' => $order->id,
-                // 'reference_id' => 377,
-                // 'payment_methods' => [$this->integrations['OnlineCard']],
                 'payment_methods' => [$this->integrations[$type]],
                 'email' => $request->email,
                 'full_name' => $request->name,

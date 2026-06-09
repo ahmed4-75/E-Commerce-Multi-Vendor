@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateShopRequest;
 use App\Models\Shop;
 use App\Repositories\Contracts\ShopInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ShopService
 {
@@ -46,7 +47,7 @@ class ShopService
 
     public function update(UpdateShopRequest $request, int $id)
     {
-        $shop = Shop::findOrFail($id);
+        $shop = Shop::whereKey($id)->where('user_id', Auth::id())->firstOrFail();
         return $this->shopRepository->update($request, $shop);
     }
 
@@ -58,8 +59,21 @@ class ShopService
 
     public function unban(int $id)
     {
-        $shop = Shop::findOrFail($id);
+        $shop = Shop::withTrashed()->findOrFail($id);
         return $this->shopRepository->unban($shop);
+    }
+
+    public function deleteMine(int $id)
+    {
+        $shop = Shop::whereKey($id)->where('user_id', Auth::id())->firstOrFail();
+
+        if ($shop->products()->withTrashed()->exists()) {
+            throw new \Exception(
+                'Can not delete the shop because it has related products. Move the products or delete them.'
+            );
+        }
+
+        return $this->shopRepository->delete($shop);
     }
 
     public function delete(int $id)

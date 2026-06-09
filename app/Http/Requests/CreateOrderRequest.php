@@ -31,8 +31,7 @@ class CreateOrderRequest extends FormRequest
             'email' => 'required|email|max:255',
             'address' => 'required|string|max:500',
             'phone' => 'required|string|max:20',
-            'currency' => 'required|string|max:10',
-            'payment_gateway' => 'required|string|max:255',
+            'currency' => 'required|string|max:10'
         ];
     }
 }

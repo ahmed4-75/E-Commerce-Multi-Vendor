@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\AddTranslationRequest;
+use App\Http\Requests\RemoveTranslationRequest;
+use App\Models\Translation;
 use App\Services\TranslationService;
 
 class TranslationsController extends Controller
@@ -40,14 +43,19 @@ class TranslationsController extends Controller
      *
      *     @OA\Response(
      *         response=404,
-     *         description="Category not found"
+     *         description="Category not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Category not found.")
+     *         )
      *     )
      * )
     */
     public function categoryLangs(int $id)
     {
         $data = $this->translationService->categoryLangs($id);
-        return response()->json($data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -66,7 +74,7 @@ class TranslationsController extends Controller
      *             required={"name","description","lang"},
      *             @OA\Property(property="name",type="string",maxLength=255,example="Electronics"),
      *             @OA\Property(property="description",type="string",example="Electrónica y dispositivos modernos"),
-     *             @OA\Property(property="lang",type="string",ref="#/components/schemas/LanguagesEnum",description=" from LanguagesEnum",example="sp"),
+     *             @OA\Property(property="lang",type="string",ref="#/components/schemas/LanguagesEnum",description=" from LanguagesEnum",example="sp")
      *         )
      *     ),
      *
@@ -95,35 +103,108 @@ class TranslationsController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *        )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
-     *         description="Category not found"
+     *         description="Category not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Category not found.")
+     *         )
      *     ),
      *
      *     @OA\Response(
      *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message",type="string",example="The given data was invalid."),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 @OA\Property(property="name",type="array",@OA\Items(type="string"),example={"The name field is required."}),
-     *                 @OA\Property(property="description",type="array",@OA\Items(type="string"),example={"The description field is required."}),
-     *                 @OA\Property(property="lang",type="array",@OA\Items(type="string"),example={"The selected lang is invalid."})
-     *             )
-     *         )
+     *         description="Validation error"
      *     )
      * )
     */
     public function addToCategory(int $id, AddTranslationRequest $request)
     {
+        Gate::authorize('addToCategory', Translation::class);
+
         $this->translationService->addToCategory($id, $request);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Translation added successfully'
         ], 201);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/Translations/category/remove/{id}",
+     *     summary="Remove category translation",
+     *     description="Delete a specific translation from a category.",
+     *     tags={"Translations"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id",in="path",required=true,description="Category ID",@OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"translation_id","lang"},
+     *             @OA\Property(property="translation_id",type="integer",example=5),
+     *             @OA\Property(property="lang",type="string",ref="#/components/schemas/LanguagesEnum",description="Value from LanguagesEnum",example="en")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Translation removed successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Translation removed successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Category or Translation not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *            @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Category or Translation not found.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation Error"
+     *     )
+     * )
+     */
+    public function removeFromCategory(int $id, RemoveTranslationRequest $request)
+    {
+        Gate::authorize('removeFromCategory', Translation::class);
+
+        $this->translationService->removeFromCategory($id, $request);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Translation removed successfully'
+        ], 200);
     }
 
     /**
@@ -155,7 +236,12 @@ class TranslationsController extends Controller
      *
      *     @OA\Response(
      *         response=404,
-     *         description="Product not found or unauthorized"
+     *         description="Product not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Product not found.")
+     *         )
      *     )
      * )
     */
@@ -181,7 +267,7 @@ class TranslationsController extends Controller
      *             required={"name","description","lang"},
      *             @OA\Property(property="name",type="string",maxLength=255,example="Laptop"),
      *             @OA\Property(property="description",type="string",example="Portátil de alto rendimiento"),
-     *             @OA\Property(property="lang",type="string",ref="#/components/schemas/LanguagesEnum",description=" from LanguagesEnum",example="sp"),
+     *             @OA\Property(property="lang",type="string",ref="#/components/schemas/LanguagesEnum",description=" from LanguagesEnum",example="sp")
      *         )
      *     ),
      *
@@ -210,34 +296,107 @@ class TranslationsController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *            @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
-     *         description="Product not found or unauthorized"
+     *         description="Product not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Product not found.")
+     *         )
      *     ),
      *
      *     @OA\Response(
      *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message",type="string",example="The given data was invalid."),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 @OA\Property(property="name",type="array",@OA\Items(type="string"),example={"The name field is required."}),
-     *                 @OA\Property(property="description",type="array",@OA\Items(type="string"),example={"The description field is required."}),
-     *                 @OA\Property(property="lang",type="array",@OA\Items(type="string"),example={"The selected lang is invalid."})
-     *             )
-     *         )
+     *         description="Validation error"
      *     )
      * )
     */
     public function addToProduct(int $id, AddTranslationRequest $request)
     {
+        Gate::authorize('addToProduct', Translation::class);
+
         $this->translationService->addToProduct($id, $request);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Translation added successfully'
         ], 201);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/Translations/product/remove/{id}",
+     *     summary="Remove product translation",
+     *     description="Delete a specific translation from a product owned by the authenticated user.",
+     *     tags={"Translations"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id",in="path",required=true,description="Product ID",@OA\Schema(type="integer", example=10)),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"translation_id","lang"},
+     *             @OA\Property(property="translation_id",type="integer",example=7),
+     *             @OA\Property(property="lang",type="string",ref="#/components/schemas/LanguagesEnum",description=" from LanguagesEnum",example="sp")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Translation removed successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Translation removed successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *            type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Product or Translation not found",
+     *         @OA\JsonContent(
+     *            type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Product or Translation not found.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation Error"
+     *     )
+     * )
+    */
+    public function removeFromProduct(int $id, RemoveTranslationRequest $request)
+    {
+        Gate::authorize('removeFromProduct', Translation::class);
+
+        $this->translationService->removeFromProduct($id, $request);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Translation removed successfully'
+        ], 200);
     }
 }
