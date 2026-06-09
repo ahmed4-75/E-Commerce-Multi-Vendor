@@ -81,8 +81,7 @@ class Product extends Model
     public function carts(): BelongsToMany
     {
         return $this->belongsToMany(Cart::class,'products_carts','product_id','cart_id')
-        ->withPivot(['quantity','price'])->as('item')
-        ;
+        ->withPivot(['quantity','price'])->as('item');
     }
 
     /**
@@ -91,20 +90,6 @@ class Product extends Model
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class,'ordered_products','product_id','order_id')
-        ->withPivot(['quantity','price'])->as('item')
-        ;
+        ->withPivot(['quantity','price'])->as('item');
     }
-
-    // public function productsCarts(): HasMany
-    // {
-    //     return $this->hasMany(ProductsCart::class,'product_id');
-    // }
-
-    /**
-     * The ordered products that belong to the product.
-    */
-    // public function orderedProducts(): HasMany
-    // {
-    //     return $this->hasMany(OrderedProducts::class,'product_id');
-    // }
 }

@@ -89,9 +89,8 @@ class ProductRepository implements ProductInterface
             'description' => $request->description,
             'lang' => $request->lang,
         ]);
-        return true;
         // foreach ($request->input('images', []) as $index => $imageData) {
-        //     $pageName = $imageData['page_name'];
+            //     $pageName = $imageData['page_name'];
         //     $imageFile = $request->file("images.$index.image_path");
         //     $fileName = Str::slug($request->name).'_product_'.$pageName.'.'.$imageFile->getClientOriginalExtension();
 
@@ -102,6 +101,7 @@ class ProductRepository implements ProductInterface
         //         'image_path' => $fileName,
         //     ]);
         // }
+        return true;
     }
 
     public function update(UpdateProductRequest $request, Product $product)

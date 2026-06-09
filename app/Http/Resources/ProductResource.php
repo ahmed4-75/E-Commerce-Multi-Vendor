@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-
 /**
  * @OA\Schema(
  *     schema="ProductResource",
@@ -22,7 +21,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="translation", ref="#/components/schemas/TranslationResource"),
  *     @OA\Property(property="productImages", type="array", description="Loaded only if relation productImages is loaded", @OA\Items(ref="#/components/schemas/ProductImageResource")),
  *     @OA\Property(property="comments", type="array", description="Loaded only if relation comments is loaded", @OA\Items(ref="#/components/schemas/CommentResource")),
- *     @OA\Property(property="carts", type="array", description="Loaded only if relation carts is loaded", @OA\Items(ref="#/components/schemas/CartResource"))
+ *     @OA\Property(property="carts", type="array", description="Loaded only if relation carts is loaded", @OA\Items(ref="#/components/schemas/CartResource")),
+ *     @OA\Property(property="orders", type="array", description="Loaded only if relation orders is loaded", @OA\Items(ref="#/components/schemas/OrderResource"))
  * )
 */
 class ProductResource extends JsonResource
@@ -49,7 +49,8 @@ class ProductResource extends JsonResource
             'translation' => $translation ? new TranslationResource($translation) : null,
             'productImages' => ProductImageResource::collection($this->whenLoaded('productImages')),
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
-            'carts' => CartResource::collection($this->whenLoaded('carts'))
+            'carts' => CartResource::collection($this->whenLoaded('carts')),
+            'orders' => OrderResource::collection($this->whenLoaded('orders'))
         ];
     }
 }

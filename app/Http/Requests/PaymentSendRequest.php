@@ -25,7 +25,7 @@ class PaymentSendRequest extends FormRequest
             'name' => ['required','string','min:3'],
             'phone_number' => ['required','string','phone:AUTO'],
             'email' => ['required','email','max:255'],
-            'amount' => ['required','decimal:0,2'],
+            // 'amount' => ['required','decimal:0,2'],
             'currency' => ['required','string','max:3'],
             'description' => ['nullable','string','max:500']
         ];

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
+use App\Models\Order;
 use App\Services\OrderService;
+use Illuminate\Support\Facades\Gate;
 
 class OrdersController extends Controller
 {
@@ -27,6 +29,7 @@ class OrdersController extends Controller
      *         response=200,
      *         description="Orders retrieved successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(
      *                 property="orders",
      *                 type="object",
@@ -68,10 +71,7 @@ class OrdersController extends Controller
      *
      *     @OA\Response(
      *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
+     *         description="Unauthenticated"
      *     )
      * )
     */
@@ -83,10 +83,98 @@ class OrdersController extends Controller
             'orders' => OrderResource::collection($orders),
             'status' => 'Success',
             'message' => 'Orders User retrieved successfully.',
-        ]);
+        ], 200);
     }
 
-        /**
+    /**
+     * @OA\Get(
+     *     path="/api/orders/product/{id}",
+     *     summary="Get orders for a specific product",
+     *     description="Retrieve paginated orders for a specific product.",
+     *     tags={"Orders"},
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id",in="path",description="Product ID",required=true,@OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Orders retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="orders",
+     *                 type="object",
+     *                 @OA\Property(property="data",type="array",@OA\Items(ref="#/components/schemas/OrderResource")),
+     *                 @OA\Property(
+     *                     property="links",
+     *                     type="object",
+     *                     @OA\Property(property="first", type="string", example="http://example.com/api/orders/product/1?page=1"),
+     *                     @OA\Property(property="last", type="string", example="http://example.com/api/orders/product/1?page=5"),
+     *                     @OA\Property(property="prev", type="string", nullable=true, example=null),
+     *                     @OA\Property(property="next", type="string", nullable=true, example="http://example.com/api/orders/product/1?page=2")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="meta",
+     *                     type="object",
+     *                     @OA\Property(property="current_page", type="integer", example=1),
+     *                     @OA\Property(property="from", type="integer", example=1),
+     *                     @OA\Property(property="last_page", type="integer", example=5),
+     *                     @OA\Property(property="path", type="string", example="http://example.com/api/orders/product/1"),
+     *                     @OA\Property(property="per_page", type="integer", example=10),
+     *                     @OA\Property(property="to", type="integer", example=10),
+     *                     @OA\Property(property="total", type="integer", example=50),
+     *                     @OA\Property(
+     *                         property="links",
+     *                         type="array",
+     *                         @OA\Items(
+     *                             type="object",
+     *                             @OA\Property(property="url", type="string", nullable=true, example="http://localhost/Ecommerce/public/api/orders/product/1?page=1"),
+     *                             @OA\Property(property="label", type="string", example="1"),
+     *                             @OA\Property(property="active", type="boolean", example=true)
+     *                         )
+     *                     )
+     *                 ),
+     *             ),
+     *             @OA\Property(property="status", type="string", example="Success"),
+     *             @OA\Property(property="message", type="string", example="Orders Product retrieved successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *            type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="product not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Product not found.")
+     *         )
+     *     )
+     * )
+    */
+    public function ordersProduct(int $id)
+    {
+        Gate::authorize('ordersProduct', Order::class);
+
+        $orders = $this->orderService->ordersProduct($id);
+
+        return response()->json([
+            'orders' => OrderResource::collection($orders),
+            'status' => 'Success',
+            'message' => 'Orders Product retrieved successfully.',
+        ], 200);
+    }
+
+    /**
      * @OA\Get(
      *     path="/api/orders/all",
      *     summary="Get all orders",
@@ -100,6 +188,7 @@ class OrdersController extends Controller
      *         response=200,
      *         description="Orders retrieved successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(
      *                 property="orders",
      *                 type="object",
@@ -141,22 +230,31 @@ class OrdersController extends Controller
      *
      *     @OA\Response(
      *         response=401,
-     *         description="Unauthenticated",
+     *         description="Unauthenticated"
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     )
      * )
     */
     public function allOrders()
     {
+        Gate::authorize('allOrders', Order::class);
+
         $orders = $this->orderService->allOrders();
 
         return response()->json([
             'orders' => OrderResource::collection($orders),
             'status' => 'Success',
             'message' => 'All Orders retrieved successfully.',
-        ]);
+        ], 200);
     }
 
     /**
@@ -178,8 +276,7 @@ class OrdersController extends Controller
      *             @OA\Property(property="email",type="string",format="email",maxLength=255,example="ahmed@example.com"),
      *             @OA\Property(property="address",type="string",maxLength=500,example="Mansoura, Egypt"),
      *             @OA\Property(property="phone",type="string",maxLength=20,example="+20 1065484974"),
-     *             @OA\Property(property="currency",type="string",maxLength=10,example="EGP"),
-     *             @OA\Property(property="payment_gateway",type="string",maxLength=255,example="paypal")
+     *             @OA\Property(property="currency",type="string",maxLength=10,example="EGP")
      *         )
      *     ),
      *
@@ -190,6 +287,16 @@ class OrdersController extends Controller
      *             type="object",
      *             @OA\Property(property="status",type="string",example="Success"),
      *             @OA\Property(property="message",type="string",example="Order created successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=204,
+     *         description="Cart is empty",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="No Content"),
+     *             @OA\Property(property="message",type="string",example="Cart is empty.")
      *         )
      *     ),
      *
@@ -209,30 +316,35 @@ class OrdersController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *         response=403,
+     *         response=409,
      *         description="Cart does not belong to authenticated user",
-     *         @OA\JsonContent(type="object",
+     *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status",type="string",example="Error"),
      *             @OA\Property(property="message",type="string",example="This Cart does not belong to the authenticated user.")
      *         )
      *     ),
      *
      *     @OA\Response(
-     *         response=422,
-     *         description="Validation Error",
+     *         response=403,
+     *         description="Insufficient permissions",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message",type="string",example="The given data was invalid."),
-     *             @OA\Property(property="errors",type="object",
-     *                 @OA\Property(property="cart_id",type="array",@OA\Items(type="string", example="The selected cart id is invalid.")),
-     *                 @OA\Property(property="email",type="array",@OA\Items(type="string", example="The email field must be a valid email address."))
-     *             )
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation Error"
      *     )
      * )
     */
     public function store(CreateOrderRequest $request)
     {
+        Gate::authorize('store', Order::class);
+
         $this->orderService->store($request);
 
         return response()->json([
@@ -272,11 +384,8 @@ class OrdersController extends Controller
      *         description="Order not found",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="No query results for model [Order]."
-     *             )
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="No query results for model [Order].")
      *         )
      *     )
      * )
@@ -289,7 +398,7 @@ class OrdersController extends Controller
             'order' => new OrderResource($order),
             'status' => 'Success',
             'message' => 'Order retrieved successfully.',
-        ]);
+        ], 200);
     }
 
     /**
@@ -327,30 +436,190 @@ class OrdersController extends Controller
      *     @OA\Response(
      *         response=404,
      *         description="Order not found",
-     *         @OA\JsonContent(type="object",@OA\Property(property="message",type="string",example="No query results for model [Order]."))
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Order not found."))
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
      *     ),
      *
      *     @OA\Response(
      *         response=422,
-     *         description="Validation Error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message",type="string",example="The given data was invalid."),
-     *             @OA\Property(property="errors",type="object",
-     *                 @OA\Property(property="note",type="array",@OA\Items(type="string",example="The note field must be a string."))
-     *             )
-     *         )
+     *         description="Validation Error"
      *     )
      * )
     */
     public function update(UpdateOrderRequest $request, int $id)
     {
+        Gate::authorize('update', Order::class);
+
         $this->orderService->update($request, $id);
 
         return response()->json([
             'status' => 'Success',
             'message' => 'Order updated successfully.'
-        ]);
+        ], 200);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/orders/shipping/{id}",
+     *     tags={"Orders"},
+     *     summary="Shipping order",
+     *     description="Update the status of a specific order to 'shipping'.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id",in="path",required=true,description="Order ID",@OA\Schema(type="integer",example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order shipping successfully.",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Success"),
+     *             @OA\Property(property="message",type="string",example="Order shipping successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Order not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Order not found.")
+     *         )
+     *     )
+     * )
+    */
+    public function shipping(int $id)
+    {
+        Gate::authorize('shipping', Order::class);
+
+        $this->orderService->shipping($id);
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'Order on shipping successfully.'
+        ], 200);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/orders/delivered/{id}",
+     *     tags={"Orders"},
+     *     summary="Deliver order",
+     *     description="Update the status of a specific order to 'delivered'.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id",in="path",required=true,description="Order ID",@OA\Schema(type="integer",example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order delivered successfully.",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Success"),
+     *             @OA\Property(property="message",type="string",example="Order delivered successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Order not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Order not found.")
+     *         )
+     *     )
+     * )
+    */
+    public function delivered(int $id)
+    {
+        Gate::authorize('delivered', Order::class);
+
+        $this->orderService->delivered($id);
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'Order delivered successfully.'
+        ], 200);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/orders/delete-ready/{id}",
+     *     tags={"Orders"},
+     *     summary="Authenticated user order status delete ready",
+     *     description="Authenticated user making his order to be ready for deletion.",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id",in="path",required=true,description="Order ID",@OA\Schema(type="integer",example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order Status ready to delete successfully.",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Success"),
+     *             @OA\Property(property="message",type="string",example="Order Status ready to delete successfully.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Order not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Order not found.")
+     *         )
+     *     )
+     * )
+    */
+    public function deleteReady(int $id)
+    {
+        $this->orderService->deleteReady($id);
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'Order Status ready to delete successfully.',
+        ], 200);
     }
 
     /**
@@ -358,7 +627,7 @@ class OrdersController extends Controller
      *     path="/api/orders/delete/{id}",
      *     tags={"Orders"},
      *     summary="Delete an order",
-     *     description="Delete a specific order for the authenticated user.",
+     *     description="Delete a specific order.",
      *     security={{"sanctum":{}}},
      *
      *     @OA\Parameter(name="id",in="path",required=true,description="Order ID",@OA\Schema(type="integer",example=1)),
@@ -374,8 +643,13 @@ class OrdersController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated"
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -383,18 +657,21 @@ class OrdersController extends Controller
      *         description="Order not found",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message",type="string",example="No query results for model [Order].")
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Order not found.")
      *         )
      *     )
      * )
     */
     public function delete(int $id)
     {
+        Gate::authorize('delete', Order::class);
+
         $this->orderService->delete($id);
 
         return response()->json([
             'status' => 'Success',
             'message' => 'Order deleted successfully.',
-        ]);
+        ], 200);
     }
 }

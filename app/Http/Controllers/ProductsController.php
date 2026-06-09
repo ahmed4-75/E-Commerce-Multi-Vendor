@@ -8,8 +8,10 @@ use Illuminate\Http\Request;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\CommentResource;
 use App\Http\Resources\ProductResource;
+use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ProductsController extends Controller
 {
@@ -19,7 +21,7 @@ class ProductsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/products/{id}",
+     *     path="/api/products/category/{id}",
      *     tags={"Products"},
      *     summary="Show products by category",
      *     description="Returns products for a category based on a language",
@@ -33,14 +35,15 @@ class ProductsController extends Controller
      *         response=200,
      *         description="All products",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data",type="array",@OA\Items(ref="#/components/schemas/ProductResource")),
      *             @OA\Property(
      *                 property="links",
      *                 type="object",
-     *                 @OA\Property(property="first", type="string", example="http://example.com/api/products?page=1"),
-     *                 @OA\Property(property="last", type="string", example="http://example.com/api/products?page=5"),
+     *                 @OA\Property(property="first", type="string", example="http://example.com/api/products/category/?page=1"),
+     *                 @OA\Property(property="last", type="string", example="http://example.com/api/products/category/?page=5"),
      *                 @OA\Property(property="prev", type="string", nullable=true, example=null),
-     *                 @OA\Property(property="next", type="string", nullable=true, example="http://example.com/api/products?page=2")
+     *                 @OA\Property(property="next", type="string", nullable=true, example="http://example.com/api/products/category/?page=2")
      *             ),
      *             @OA\Property(
      *                 property="meta",
@@ -48,7 +51,7 @@ class ProductsController extends Controller
      *                 @OA\Property(property="current_page", type="integer", example=1),
      *                 @OA\Property(property="from", type="integer", example=1),
      *                 @OA\Property(property="last_page", type="integer", example=5),
-     *                 @OA\Property(property="path", type="string", example="http://example.com/api/products"),
+     *                 @OA\Property(property="path", type="string", example="http://example.com/api/products/category/"),
      *                 @OA\Property(property="per_page", type="integer", example=9),
      *                 @OA\Property(property="to", type="integer", example=9),
      *                 @OA\Property(property="total", type="integer", example=50),
@@ -57,7 +60,7 @@ class ProductsController extends Controller
      *                     type="array",
      *                     @OA\Items(
      *                         type="object",
-     *                         @OA\Property(property="url", type="string", nullable=true, example="http://localhost/Ecommerce/public/api/products?page=1"),
+     *                         @OA\Property(property="url", type="string", nullable=true, example="http://localhost/Ecommerce/public/api/products/category/?page=1"),
      *                         @OA\Property(property="label", type="string", example="1"),
      *                         @OA\Property(property="active", type="boolean", example=true)
      *                     )
@@ -72,12 +75,16 @@ class ProductsController extends Controller
      *         response=404,
      *         description="products does not exist",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="The products for this category or language does not exist")
      *         )
      *     ),
      *
-     *     @OA\Response(response=422,description="Validation error")
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
      * )
     */
     public function index(LanguageRequest $request ,int $id)
@@ -113,6 +120,7 @@ class ProductsController extends Controller
      *         response=200,
      *         description="Shop products retrieved successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(
      *                 property="data",
      *                 type="object",
@@ -157,6 +165,16 @@ class ProductsController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *            type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
      *         description="Not found — either the shop doesn't exist or no products for this language",
      *         @OA\JsonContent(
@@ -177,6 +195,8 @@ class ProductsController extends Controller
      */
     public function shopProducts(LanguageRequest $request ,int $id)
     {
+        Gate::authorize('shopProducts', Product::class);
+
         $lang = $request->validated('lang') ?? Auth::user()?->lang;
 
         $data = $this->productService->shopProducts($lang ,$id);
@@ -214,6 +234,7 @@ class ProductsController extends Controller
      *         response=200,
      *         description="Banned products retrieved successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data",type="array",description="Paginated list of banned products",@OA\Items(ref="#/components/schemas/ProductResource")),
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Banned products")
@@ -221,9 +242,20 @@ class ProductsController extends Controller
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *            type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
      *         description="No banned products found for the given language",
      *         @OA\JsonContent(
+     *            type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="The banned products for this shop or language does not exist")
      *         )
@@ -231,17 +263,14 @@ class ProductsController extends Controller
      *
      *     @OA\Response(
      *         response=422,
-     *         description="Validation error on the lang parameter",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", example="Error"),
-     *             @OA\Property(property="message", type="string", example="The lang field must be a string.")
-     *         )
+     *         description="Validation error on the lang parameter"
      *     ),
      *
      *     @OA\Response(
      *         response=500,
      *         description="Server error",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Internal server error")
      *         )
@@ -250,6 +279,8 @@ class ProductsController extends Controller
      */
     public function bannedProducts(LanguageRequest $request)
     {
+        Gate::authorize('bannedProducts', Product::class);
+
         $lang = $request->validated('lang') ?? Auth::user()?->lang;
 
         $products = $this->productService->bannedProducts($lang);
@@ -282,6 +313,7 @@ class ProductsController extends Controller
      *         response=200,
      *         description="Search results retrieved successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data",type="array",description="Paginated list of matched products",@OA\Items(ref="#/components/schemas/ProductResource")),
      *             @OA\Property(
      *                 property="links",
@@ -320,6 +352,7 @@ class ProductsController extends Controller
      *         response=404,
      *         description="No products found or category does not exist",
      *         @OA\JsonContent(
+     *            type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message",type="string",example="No products found for the given search query and language")
      *         )
@@ -327,20 +360,7 @@ class ProductsController extends Controller
      *
      *     @OA\Response(
      *         response=422,
-     *         description="Validation error — nameKey is missing or lang is not supported",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", example="Error"),
-     *             @OA\Property(property="message",type="string",example="The nameKey field is required.")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", example="Error"),
-     *             @OA\Property(property="message", type="string", example="Internal server error")
-     *         )
+     *         description="Validation error — nameKey is missing or lang is not supported"
      *     )
      * )
      */
@@ -376,6 +396,7 @@ class ProductsController extends Controller
      *         response=200,
      *         description="Show product",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(
      *                 property="data",
      *                 type="object",
@@ -418,14 +439,18 @@ class ProductsController extends Controller
      *
      *     @OA\Response(
      *         response=404,
-     *         description="product does not exist",
+     *         description="product not found",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Product not found")
      *         )
      *     ),
      *
-     *     @OA\Response(response=422,description="Validation error")
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
      * )
     */
     public function show(LanguageRequest $request ,int $id)
@@ -483,17 +508,19 @@ class ProductsController extends Controller
      *         response=201,
      *         description="Create product",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Product Created Successfully, Available only in en")
      *         )
      *     ),
      *
      *     @OA\Response(
-     *         response=422,
-     *         description="Validation error — missing or invalid fields",
+     *         response=403,
+     *         description="Insufficient permissions",
      *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", example="Error"),
-     *             @OA\Property(property="message",type="string",example="The description has already been taken.")
+     *            type="object",
+     *            @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -501,11 +528,16 @@ class ProductsController extends Controller
      *         response=404,
      *         description="Category or Shop not found",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Category not found")
      *         )
      *     ),
      *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error — missing or invalid fields"
+     *     ),
      *     @OA\Response(
      *         response=500,
      *         description="Category is missing translations — product cannot be created",
@@ -514,7 +546,7 @@ class ProductsController extends Controller
      *             @OA\Property(
      *                 property="message",
      *                 type="string",
-     *                 example="You cannot use this category for now because it is Missing translation, please waite for all translations to be available"
+     *                 example="You cannot use this category for now because it is Missing translation, please waite for any translation to be available."
      *             )
      *         )
      *     )
@@ -522,6 +554,8 @@ class ProductsController extends Controller
     */
     public function store(CreateProductRequest $request)
     {
+        Gate::authorize('store', Product::class);
+
         $this->productService->store($request);
 
         return response()->json([
@@ -571,8 +605,19 @@ class ProductsController extends Controller
      *         response=200,
      *         description="Update product",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Product Updated Successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *            type="object",
+     *            @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -580,6 +625,7 @@ class ProductsController extends Controller
      *         response=404,
      *         description="Product not found",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Product does not exist")
      *         )
@@ -593,6 +639,8 @@ class ProductsController extends Controller
     */
     public function update(UpdateProductRequest $request, int $id)
     {
+        Gate::authorize('update', Product::class);
+
         $this->productService->update($request, $id);
 
         return response()->json([
@@ -615,8 +663,19 @@ class ProductsController extends Controller
      *         response=200,
      *         description="Product banned successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Product banned successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *            type="object",
+     *            @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -624,6 +683,7 @@ class ProductsController extends Controller
      *         response=404,
      *         description="Product not found",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message", type="string", example="Product not found")
      *         )
@@ -641,6 +701,8 @@ class ProductsController extends Controller
     */
     public function ban(int $id)
     {
+        Gate::authorize('ban', Product::class);
+
         $this->productService->ban($id);
 
         return response()->json([
@@ -663,19 +725,37 @@ class ProductsController extends Controller
      *         response=200,
      *         description="Product unbanned successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Product unbanned successfully")
      *         )
      *     ),
      *
      *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
      *         response=404,
-     *         description="Product not found"
+     *         description="Product not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Product not found")
+     *         )
      *     )
      * )
     */
     public function unban(int $id)
     {
+        Gate::authorize('unban', Product::class);
+
         $this->productService->unban($id);
 
         return response()->json([
@@ -683,6 +763,67 @@ class ProductsController extends Controller
             'message' => 'Product unbanned successfully',
         ], 200);
     }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/products/delete-myProduct/{id}",
+     *     tags={"Products"},
+     *     summary="Delete my product",
+     *     description="Delete a product with all translations and images",
+     *     security={{"sanctum":{}}},
+     *
+     *     @OA\Parameter(name="id", in="path", required=true, description="product id", @OA\Schema(type="integer", example=1)),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Delete product success",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Success"),
+     *             @OA\Property(property="message", type="string", example="Product deleted successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Product not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Product does not exist")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=409,
+     *         description="delete product failed",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Cannot delete product because it is associated with existing orders or carts")
+     *         )
+     *    )
+     * )
+    */
+    public function deleteMine(int $id)
+    {
+        try {
+            $this->productService->deleteMine($id);  # يوجد هنا مشكلة
+
+            return response()->json([
+                'status' => 'Success',
+                'message' => 'Product deleted successfully',
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => 'Error',
+                'message' => $e->getMessage(),
+            ], 409);
+        }
+    }
+
     /**
      * @OA\Delete(
      *     path="/api/products/delete/{id}",
@@ -697,8 +838,19 @@ class ProductsController extends Controller
      *         response=200,
      *         description="Delete product success",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Success"),
      *             @OA\Property(property="message", type="string", example="Product deleted successfully")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Insufficient permissions",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="This action is unauthorized.")
      *         )
      *     ),
      *
@@ -706,19 +858,41 @@ class ProductsController extends Controller
      *         response=404,
      *         description="Product not found",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="status", type="string", example="Error"),
-     *             @OA\Property(property="message", type="string", example="Product does not exist")
+     *             @OA\Property(property="message", type="string", example="Product not found")
      *         )
-     *     )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=409,
+     *         description="delete product failed",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="Error"),
+     *             @OA\Property(property="message", type="string", example="Cannot delete product because it is associated with existing orders or carts")
+     *         )
+     *    )
      * )
     */
     public function delete(int $id)
     {
-        $this->productService->delete($id);
+        Gate::authorize('delete', Product::class);
 
-        return response()->json([
-            'status' => 'Success',
-            'message' => 'Product deleted successfully',
-        ], 200);
+        try {
+            $this->productService->delete($id);  # يوجد هنا مشكلة
+
+            return response()->json([
+                'status' => 'Success',
+                'message' => 'Product deleted successfully',
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => 'Error',
+                'message' => $e->getMessage(),
+            ], 409);
+        }
     }
 }

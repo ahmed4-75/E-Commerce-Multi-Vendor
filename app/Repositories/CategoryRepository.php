@@ -38,7 +38,7 @@ class CategoryRepository implements CategoryInterface
 
     public function update(UpdateCategoryRequest $request , Category $category, string $fileName)
     {
-        if($fileName != $category->image_path){
+        if($fileName !== $category->image_path){
             $category->update([ 'image_path' => $fileName ]);
         }
 

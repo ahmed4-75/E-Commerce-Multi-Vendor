@@ -34,7 +34,6 @@ class PaymentsController extends Controller
      *             @OA\Property(property="name",type="string",example="Ahmed Morgan"),
      *             @OA\Property(property="phone_number",type="string",example="+201012345678"),
      *             @OA\Property(property="email",type="string",format="email",example="ahmed@example.com"),
-     *             @OA\Property(property="amount",type="number",format="float",example=150.50),
      *             @OA\Property(property="currency",type="string",example="EGP"),
      *             @OA\Property(property="description",type="string",nullable=true,example="Order Payment")
      *         )
@@ -56,6 +55,15 @@ class PaymentsController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="success",type="boolean",example=false),
      *             @OA\Property(property="message",type="string",example="Invalid payment data")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Order not found",
+     *        @OA\JsonContent(
+     *             @OA\Property(property="success",type="string",example="Error"),
+     *             @OA\Property(property="message",type="string",example="Order not found.")
      *         )
      *     ),
      *

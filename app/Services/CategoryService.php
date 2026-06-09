@@ -52,7 +52,7 @@ class CategoryService
         if ($category->products()->withTrashed()->exists()) {
             throw new \Exception(
                 'Can not delete the category because it has related products. Move the products or delete them.'
-            );
+            , 409);
         }
         return $this->categoryRepository->delete($category);
     }

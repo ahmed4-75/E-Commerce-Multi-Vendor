@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Cart;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class DeleteExpiredCarts extends Command
 {
@@ -26,13 +27,15 @@ class DeleteExpiredCarts extends Command
      */
     public function handle()
     {
-        Cart::query()->where('created_at', '<', now()->subDays(2))->with('products')
+        Cart::query()->where('created_at','<', now()->subDays(2))->with(['products' => fn ($query) => $query->withTrashed()])
         ->chunkById(50, function ($carts) {
             foreach ($carts as $cart) {
-                foreach ($cart->products as $product) {
-                    $product->increment('quantity',$product->item->quantity,[]);
-                }
-            Cart::destroy($cart->id);
+                DB::transaction(function () use ($cart) {
+                    foreach ($cart->products as $product) {
+                        $product->increment('quantity',$product->item->quantity,[]);
+                    }
+                });
+                Cart::destroy($cart->id);
             }
         });
 
