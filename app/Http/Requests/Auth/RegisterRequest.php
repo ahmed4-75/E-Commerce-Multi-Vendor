@@ -29,7 +29,7 @@ class RegisterRequest extends FormRequest
             'password' => 'required|string|min:6|confirmed',
             'phone' => 'nullable|string|unique:users,phone|phone:AUTO',
             'lang' => ['required', new Enum(LanguagesEnum::class)],
-            'favicon' => 'nullable|string|file|mimes:pdf,jpeg,jpg,png|max:6120'
+            'favicon' => 'nullable|file|mimes:pdf,jpeg,jpg,png|max:6120'
         ];
     }
 
@@ -42,6 +42,6 @@ class RegisterRequest extends FormRequest
     {
         return [
             'phone.phone' => 'Invalid Phone Number'
-        ];   
+        ];
     }
 }

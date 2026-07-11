@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\LanguagesEnum;
-// use App\Enums\PagesNamesEnum;
+use App\Enums\PagesNamesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -33,10 +33,10 @@ class CreateProductRequest extends FormRequest
             'discount' => 'nullable|decimal:0,2',
             'category_id' => 'required|exists:categories,id',
             'shop_id' => 'required|exists:shops,id',
-            // 'images' => ['required','array','max:'.count(PagesNamesEnum::cases())],
-            // 'images.*' => 'required|array',
-            // 'images.*.page_name' => ['required', new Enum(PagesNamesEnum::class),'distinct'],
-            // 'images.*.image_path' => 'required|file|mimes:pdf,jpeg,jpg,png|max:6120'
+            'images' => ['required','array','max:'.count(PagesNamesEnum::cases())],
+            'images.*' => 'required|array',
+            'images.*.page_name' => ['required', new Enum(PagesNamesEnum::class),'distinct'],
+            'images.*.image_path' => 'required|file|mimes:pdf,jpeg,jpg,png|max:6120'
         ];
     }
 }

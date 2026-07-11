@@ -10,8 +10,8 @@ use App\Models\Product;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-// use Illuminate\Support\Facades\Storage;
-// use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductRepository implements ProductInterface
 {
@@ -89,19 +89,19 @@ class ProductRepository implements ProductInterface
             'description' => $request->description,
             'lang' => $request->lang,
         ]);
-        // foreach ($request->input('images', []) as $index => $imageData) {
-            //     $pageName = $imageData['page_name'];
-        //     $imageFile = $request->file("images.$index.image_path");
-        //     $fileName = Str::slug($request->name).'_product_'.$pageName.'.'.$imageFile->getClientOriginalExtension();
+        foreach ($request->input('images', []) as $index => $imageData) {
+                $pageName = $imageData['page_name'];
+            $imageFile = $request->file("images.$index.image_path");
+            $fileName = Str::slug($request->name).'_product_'.$pageName.'.'.$imageFile->getClientOriginalExtension();
 
-        //     $imageFile->storeAs('products/'.$product->id.'/', $fileName);
+            $imageFile->storeAs('products/'.$product->id.'/', $fileName);
 
-        //     $product->productImages()->create([
-        //         'page_name' => $pageName,
-        //         'image_path' => $fileName,
-        //     ]);
-        // }
-        return true;
+            $product->productImages()->create([
+                'page_name' => $pageName,
+                'image_path' => $fileName,
+            ]);
+        }
+        return $product->id;
     }
 
     public function update(UpdateProductRequest $request, Product $product)
@@ -119,34 +119,34 @@ class ProductRepository implements ProductInterface
             'description' => $request->description,
         ]);
 
-        // $newImages = collect($request->input('images', []))->keyBy('page_name');
-        // $oldImages = $product->productImages()->get()->keyBy('page_name');
+        $newImages = collect($request->input('images', []))->keyBy('page_name');
+        $oldImages = $product->productImages()->get()->keyBy('page_name');
 
-        // foreach ($newImages as $pageName => $newImage) {
+        foreach ($newImages as $pageName => $newImage) {
 
-        //     if (!isset($oldImages[$pageName])) {
-        //         continue;
-        //     }
-        //     $oldImage = $oldImages[$pageName];
+            if (!isset($oldImages[$pageName])) {
+                continue;
+            }
+            $oldImage = $oldImages[$pageName];
 
-        //     $isChanged = false;
+            $isChanged = false;
 
-        //     $imageFile = $newImage['image_path'];
-        //     $newName = $newImage['image_path']->getClientOriginalName();
-        //     $oldName = $oldImage->image_path;
+            $imageFile = $newImage['image_path'];
+            $newName = $newImage['image_path']->getClientOriginalName();
+            $oldName = $oldImage->image_path;
 
-        //     if ($newName !== $oldName) { $isChanged = true; }
+            if ($newName !== $oldName) { $isChanged = true; }
 
-        //     if ($isChanged) {
-        //         Storage::delete('products/'.$product->id.'/'.$oldName);
-        //         $fileName = Str::slug($request->name).'_product_'.$pageName.'.'.$newImage['image_path']->getClientOriginalExtension();
-        //         $imageFile->storeAs('products/'.$product->id.'/', $fileName);
-        //         $oldImage->update([
-        //             'page_name' => $newImage['page_name'],
-        //             'image_path' => $fileName,
-        //         ]);
-        //     }
-        // }
+            if ($isChanged) {
+                Storage::delete('products/'.$product->id.'/'.$oldName);
+                $fileName = Str::slug($request->name).'_product_'.$pageName.'.'.$newImage['image_path']->getClientOriginalExtension();
+                $imageFile->storeAs('products/'.$product->id.'/', $fileName);
+                $oldImage->update([
+                    'page_name' => $newImage['page_name'],
+                    'image_path' => $fileName,
+                ]);
+            }
+        }
 
         // foreach ($request->input('images', []) as $index => $imageData) {
         //     $imageFile = $request->file("images.$index.image_path");

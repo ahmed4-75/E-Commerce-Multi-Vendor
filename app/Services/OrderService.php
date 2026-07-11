@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Jobs\NotificationProcess;
 use App\Models\Order;
 use App\Models\Product;
 use App\Repositories\Contracts\OrderInterface;
@@ -34,17 +35,20 @@ class OrderService
 
     public function store(CreateOrderRequest $request)
     {
+        $user = Auth::user();
         $data = $this->cartService->show($request->lang,$request->cart_id);
         $cart = $data['cart'];
         $missing_count = $data['missing_count'];
         $missing_translation = $data['missing_translation'];
-        if($cart->user_id !== Auth::id()) {
+        if($cart->user_id !== $user->id) {
             throw new \Exception("This Cart does not belong to the authenticated user.", 409);
         }
         if($missing_translation->isNotEmpty() Or $missing_count > 0) {
             throw new \Exception("Cannot create order. There are $missing_count product in the cart that do not have translations in the requested language. All the products in the cart must be in one language.", 400);
         }
-        return $this->orderRepository->store($request, $cart);
+        $orderId =  $this->orderRepository->store($request, $cart);
+        NotificationProcess::dispatch('newOrder',$orderId)->onQueue('NewOrderNotification');
+        return true;
     }
 
     public function show(int $id)
