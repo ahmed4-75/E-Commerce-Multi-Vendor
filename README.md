@@ -77,6 +77,11 @@ php artisan create:owner
 ```
 Answer the questions to create your first User, and his role is "owner", and it has all Permissions
 
+### 4️⃣ Run Queues
+```bash
+php artisan queue:work
+```
+
 ###  ℹ️ Note
 Testing on Localhost, you need to install ngrok to test the Paymob gateway.
 

@@ -262,7 +262,7 @@ class OrdersController extends Controller
      *     path="/api/orders/create",
      *     tags={"Orders"},
      *     summary="Create a new order",
-     *     description="Create a new order using cart products for the authenticated user.",
+     *     description="Create a new order using cart products for the authenticated user, and dispatches notification jobs.",
      *     security={{"sanctum":{}}},
      *
      *     @OA\RequestBody(
