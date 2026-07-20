@@ -30,7 +30,7 @@ class OrderRepository implements OrderInterface
 
     public function store(CreateOrderRequest $request, Cart $cart)
     {
-        DB::transaction(function () use ($request, $cart) {
+        $order = DB::transaction(function () use ($request, $cart) {
             $order = Order::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -53,7 +53,10 @@ class OrderRepository implements OrderInterface
             $order->products()->attach($orderProducts);
 
             Cart::destroy($cart->id);
+
+            return $order;
         });
+        return $order->id;
     }
 
     public function show(Order $order)

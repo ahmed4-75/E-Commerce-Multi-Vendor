@@ -94,10 +94,6 @@ class User extends Authenticatable
         return $this->hasMany(Shop::class,'user_id');
     }
 
-    public function getIsActiveAttribute(): bool
-    {
-        return !$this->trashed();
-    }
 
     public function roles(): BelongsToMany
     {
@@ -112,5 +108,10 @@ class User extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         return in_array($permission, $this->permissions());
+    }
+    
+    public function getIsActiveAttribute(): bool
+    {
+        return !$this->trashed();
     }
 }

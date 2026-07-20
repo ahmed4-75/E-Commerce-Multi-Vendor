@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Mail\VerifyEmailMail;
 use App\Models\User;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -55,7 +54,7 @@ class LoginController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", example="Error"),
      *             @OA\Property(property="message",type="string",example="Email is not verified. Verification code has been sent.You authenticated to the profile")
-    
+
      *         )
      *     ),
      *     @OA\Response(
@@ -66,8 +65,8 @@ class LoginController extends Controller
      */
     public function __invoke(LoginRequest $request)
     {
-        $user = User::where('email',$request->identification)->orWhere('phone',$request->identification)->first();
-        
+        $user = User::query()->where('email',$request->identification)->orWhere('phone',$request->identification)->first();
+
         if($user and Hash::check($request->password,$user->password)){
             if(!$user->email_verified_at){
                 $otp = random_int(100000,999999);
@@ -79,10 +78,10 @@ class LoginController extends Controller
                 ],403);
             }
             if($request->remember === 'on'){
-                $token = $user->createToken('remember-authentication',['*'],Carbon::now()->addMonths(6))->plainTextToken;
+                $token = $user->createToken('remember-authentication',['*'], Carbon::now()->addMonths(6))->plainTextToken;
             }
             else{
-                $token = $user->createToken('authentication',['*'] ,Carbon::now()->addHours(2))->plainTextToken;
+                $token = $user->createToken('authentication',['*'], Carbon::now()->addHours(2))->plainTextToken;
             }
             return response()->json(
                 [

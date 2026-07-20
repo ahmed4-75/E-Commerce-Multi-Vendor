@@ -475,7 +475,7 @@ class ProductsController extends Controller
      *     path="/api/products/create",
      *     tags={"Products"},
      *     summary="Create product",
-     *     description="Create a new product",
+     *     description="Create a new product and dispatches notification jobs",
      *     security={{"sanctum":{}}},
      *
      *     @OA\RequestBody(

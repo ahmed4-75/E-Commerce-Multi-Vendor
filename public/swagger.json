@@ -2250,7 +2250,7 @@
                     "Orders"
                 ],
                 "summary": "Create a new order",
-                "description": "Create a new order using cart products for the authenticated user.",
+                "description": "Create a new order using cart products for the authenticated user, and dispatches notification jobs.",
                 "operationId": "baf6d92acc8f3faa71b6c0a6fbb19efd",
                 "requestBody": {
                     "required": true,
@@ -4010,7 +4010,7 @@
                     "Products"
                 ],
                 "summary": "Create product",
-                "description": "Create a new product",
+                "description": "Create a new product and dispatches notification jobs",
                 "operationId": "8005259ba70c8eba00515a8eb97afed7",
                 "requestBody": {
                     "required": true,
@@ -5334,6 +5334,26 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Role Not Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Cannot delete owner role",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "Error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Owner role cannot be deleted."
                                         }
                                     },
                                     "type": "object"
